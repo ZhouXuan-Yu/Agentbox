@@ -6,7 +6,7 @@
 // - Self-evolution review loop visualization
 // - KPI metrics and execution history
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { Icon } from '@iconify/react'
 import {
   KPI,
@@ -32,6 +32,7 @@ import DashboardLayout from '@/layouts/Dashboard'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { useTaskBoardStore } from '@/stores/task-board'
 import type { TaskBoardStepSummary, TaskBoardLiveLogEntry, TaskBoardLiveToolCall } from '@/stores/task-board'
+import type { TaskBoardExecutionSummary, TaskBoardThoughtSummary, TaskBoardToolCallSummary } from '@/api/task-board'
 import { listOpenClawCronJobs, type OpenClawCronJob } from '@/api/openclaw'
 import TaskTopologyView from './TaskTopologyView'
 
@@ -155,6 +156,7 @@ function LiveDashboard({
   const hasActivity = !!(store.activeExecution || store.isConnected || store.isReconnecting || store.connectionError)
   const isActive = store.isConnected || store.isReconnecting || store.activeExecution?.status === 'running' || store.activeExecution?.status === 'reviewing'
   const isConnecting = !store.isConnected && !store.activeExecutionId && (store.isReconnecting || !store.connectionError)
+  const isViewingHistory = store.isViewingHistory && store.selectedExecution
 
   return (
     <>
@@ -261,101 +263,679 @@ function LiveDashboard({
         </Card>
       )}
 
-      {/* Empty state when no active execution */}
-      {!hasActivity && (
-        <EmptyState className="flex-1 flex flex-col items-center justify-center py-16">
-          <Icon icon="lucide:play-square" className="size-16 text-default-300" />
-          <p className="mt-4 text-lg font-medium">暂无活跃任务</p>
-          <p className="mt-1 text-sm text-default-500 max-w-md text-center">
-            选择一个定时任务并点击"执行任务"，系统将通过 OpenClaw Gateway 真正触发任务执行。
-            你可以实时看到准备、执行、复盘三个阶段中的每一步操作和结果。
-          </p>
-        </EmptyState>
-      )}
+      {/* Main two-column layout: History Sidebar | Content */}
+      <div className="grid grid-cols-[280px_1fr] gap-3">
+        {/* Left: History Panel */}
+        <HistoryPanel />
 
-      {/* Visualization canvas — flow board or topology */}
-      {hasActivity && viewMode === 'flow' && <FlowBoard />}
-      {hasActivity && viewMode === 'topology' && (
-        <TaskTopologyView
-          selectedJobId={selectedJobId}
-          taskDesc={taskDesc}
-          cronJobs={cronJobs}
-        />
-      )}
+        {/* Right: Main content */}
+        <div className="flex flex-col gap-3 min-w-0">
+          {/* Empty state when no active execution and not viewing history */}
+          {!hasActivity && !isViewingHistory && (
+            <EmptyState className="flex-1 flex flex-col items-center justify-center py-16">
+              <Icon icon="lucide:play-square" className="size-16 text-default-300" />
+              <p className="mt-4 text-lg font-medium">暂无活跃任务</p>
+              <p className="mt-1 text-sm text-default-500 max-w-md text-center">
+                选择一个定时任务并点击"执行任务"，系统将通过 OpenClaw Gateway 真正触发任务执行。
+                你可以实时看到准备、执行、复盘三个阶段中的每一步操作和结果。
+              </p>
+            </EmptyState>
+          )}
 
-      {/* Active execution view */}
-      {hasActivity && (
-        <div className="flex flex-col gap-4">
-          {/* Main content: three-section monitor + detail */}
-          <div className="grid grid-cols-[1fr_1fr] gap-3">
-            {/* Left: Three sections — Thinking / Tool Calls / Streaming Output */}
-            <div className="flex flex-col gap-2 min-w-0">
-              <ThoughtPanel />
-              <ToolCallPanel />
-              <StreamOutputPanel logEndRef={logEndRef} />
+          {/* History detail view */}
+          {isViewingHistory && !hasActivity && <HistoryDetailView viewMode={viewMode} selectedJobId={selectedJobId} taskDesc={taskDesc} cronJobs={cronJobs} />}
+
+          {/* Visualization canvas — flow board or topology */}
+          {hasActivity && viewMode === 'flow' && <FlowBoard />}
+          {viewMode === 'topology' && (
+            <TaskTopologyView
+              selectedJobId={selectedJobId}
+              taskDesc={taskDesc}
+              cronJobs={cronJobs}
+            />
+          )}
+
+          {/* Active execution view */}
+          {hasActivity && (
+            <div className="flex flex-col gap-4">
+              {/* Main content: three-section monitor + detail */}
+              <div className="grid grid-cols-[1fr_1fr] gap-3">
+                {/* Left: Three sections — Thinking / Tool Calls / Streaming Output */}
+                <div className="flex flex-col gap-2 min-w-0">
+                  <ThoughtPanel />
+                  <ToolCallPanel />
+                  <StreamOutputPanel logEndRef={logEndRef} />
+                </div>
+
+                {/* Right: Step Detail Panel */}
+                <StepDetailPanel />
+              </div>
+
+              {/* Completion / Error / Stopped summary */}
+              {store.activeExecution?.status === 'complete' && (
+                <Card className="border-success/30 bg-success/5">
+                  <Card.Content className="flex flex-col gap-3 py-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center justify-center size-12 rounded-full bg-success/20 shrink-0">
+                        <Icon icon="lucide:check-circle" className="size-6 text-success" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-success">执行完成</h3>
+                        <p className="text-sm text-default-500">
+                          {store.activeExecution.durationMs != null && `耗时 ${(store.activeExecution.durationMs / 1000).toFixed(1)}s`}
+                          {store.activeExecution.reviewScore != null && ` · 评分 ${Math.round(store.activeExecution.reviewScore * 100)}%`}
+                        </p>
+                      </div>
+                      <Button variant="light" size="sm" onPress={() => store.clearActiveState()}>关闭</Button>
+                    </div>
+                    {store.activeExecution?.result && (
+                      <div className="p-3 rounded-lg bg-white/50 border border-success/20 max-h-[400px] overflow-y-auto">
+                        <p className="text-xs font-medium text-default-500 mb-1">执行结果</p>
+                        <div className="text-sm">
+                          <Markdown>{store.activeExecution.result}</Markdown>
+                        </div>
+                      </div>
+                    )}
+                  </Card.Content>
+                </Card>
+              )}
+              {store.activeExecution?.status === 'stopped' && (
+                <Card className="border-warning/30 bg-warning/5">
+                  <Card.Content className="flex items-center gap-4 py-4">
+                    <div className="flex items-center justify-center size-12 rounded-full bg-warning/20 shrink-0">
+                      <Icon icon="lucide:stop-circle" className="size-6 text-warning" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-warning">已停止</h3>
+                      <p className="text-sm text-default-500">{store.activeExecution.durationMs != null && `耗时 ${(store.activeExecution.durationMs / 1000).toFixed(1)}s`}</p>
+                    </div>
+                    <Button variant="light" size="sm" onPress={() => store.clearActiveState()}>关闭</Button>
+                  </Card.Content>
+                </Card>
+              )}
+              {store.activeExecution?.status === 'error' && (
+                <Card className="border-danger/30 bg-danger/5">
+                  <Card.Content className="flex items-center gap-4 py-4">
+                    <div className="flex items-center justify-center size-12 rounded-full bg-danger/20 shrink-0">
+                      <Icon icon="lucide:x-circle" className="size-6 text-danger" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-danger">执行失败</h3>
+                      <p className="text-sm text-default-500">{store.activeExecution.error || '未知错误'}</p>
+                    </div>
+                    <Button variant="light" size="sm" onPress={() => store.clearActiveState()}>关闭</Button>
+                  </Card.Content>
+                </Card>
+              )}
             </div>
-
-            {/* Right: Step Detail Panel */}
-            <StepDetailPanel />
-          </div>
-
-          {/* Completion / Error / Stopped summary */}
-          {store.activeExecution?.status === 'complete' && (
-            <Card className="border-success/30 bg-success/5">
-              <Card.Content className="flex flex-col gap-3 py-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center justify-center size-12 rounded-full bg-success/20 shrink-0">
-                    <Icon icon="lucide:check-circle" className="size-6 text-success" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-success">执行完成</h3>
-                    <p className="text-sm text-default-500">
-                      {store.activeExecution.durationMs != null && `耗时 ${(store.activeExecution.durationMs / 1000).toFixed(1)}s`}
-                      {store.activeExecution.reviewScore != null && ` · 评分 ${Math.round(store.activeExecution.reviewScore * 100)}%`}
-                    </p>
-                  </div>
-                  <Button variant="light" size="sm" onPress={() => store.clearActiveState()}>关闭</Button>
-                </div>
-                {store.activeExecution?.result && (
-                  <div className="p-3 rounded-lg bg-white/50 border border-success/20">
-                    <p className="text-xs font-medium text-default-500 mb-1">执行结果</p>
-                    <pre className="text-sm whitespace-pre-wrap font-sans">{store.activeExecution.result}</pre>
-                  </div>
-                )}
-              </Card.Content>
-            </Card>
-          )}
-          {store.activeExecution?.status === 'stopped' && (
-            <Card className="border-warning/30 bg-warning/5">
-              <Card.Content className="flex items-center gap-4 py-4">
-                <div className="flex items-center justify-center size-12 rounded-full bg-warning/20 shrink-0">
-                  <Icon icon="lucide:stop-circle" className="size-6 text-warning" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-warning">已停止</h3>
-                  <p className="text-sm text-default-500">{store.activeExecution.durationMs != null && `耗时 ${(store.activeExecution.durationMs / 1000).toFixed(1)}s`}</p>
-                </div>
-                <Button variant="light" size="sm" onPress={() => store.clearActiveState()}>关闭</Button>
-              </Card.Content>
-            </Card>
-          )}
-          {store.activeExecution?.status === 'error' && (
-            <Card className="border-danger/30 bg-danger/5">
-              <Card.Content className="flex items-center gap-4 py-4">
-                <div className="flex items-center justify-center size-12 rounded-full bg-danger/20 shrink-0">
-                  <Icon icon="lucide:x-circle" className="size-6 text-danger" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-danger">执行失败</h3>
-                  <p className="text-sm text-default-500">{store.activeExecution.error || '未知错误'}</p>
-                </div>
-                <Button variant="light" size="sm" onPress={() => store.clearActiveState()}>关闭</Button>
-              </Card.Content>
-            </Card>
           )}
         </div>
-      )}
+      </div>
     </>
+  )
+}
+
+// ── History Panel (left sidebar) ─────────────────────────────────
+
+function HistoryPanel() {
+  const store = useTaskBoardStore()
+  const [page, setPage] = useState(0)
+  const pageSize = 10
+
+  useEffect(() => {
+    store.loadHistory(pageSize, page * pageSize)
+  }, [page])
+
+  const totalPages = Math.max(1, Math.ceil(store.historyTotal / pageSize))
+  const isSelected = (id: string) => store.selectedExecution?.id === id && store.isViewingHistory
+
+  return (
+    <Card className="h-fit sticky top-0">
+      <Card.Header className="pb-1 pt-2 px-3">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-1.5">
+            <Icon icon="lucide:history" className="size-4 text-default-600" />
+            <h3 className="text-sm font-semibold">历史记录</h3>
+            {store.historyTotal > 0 && (
+              <Chip size="sm" variant="flat">{store.historyTotal}</Chip>
+            )}
+          </div>
+          <Button
+            variant="light"
+            size="sm"
+            isIconOnly
+            onPress={() => { setPage(0); store.loadHistory(pageSize, 0) }}
+          >
+            <Icon icon="lucide:refresh-cw" className="size-3.5" />
+          </Button>
+        </div>
+      </Card.Header>
+      <Card.Content className="pt-0 px-2 pb-2">
+        {store.historyLoading && store.history.length === 0 ? (
+          <div className="flex items-center gap-2 text-xs text-default-400 py-4 justify-center">
+            <ChatLoader.Dots />
+            <span>加载历史...</span>
+          </div>
+        ) : store.history.length === 0 ? (
+          <div className="text-xs text-default-400 py-6 text-center">
+            <Icon icon="lucide:inbox" className="size-6 mx-auto mb-1.5 opacity-40" />
+            <p>暂无执行记录</p>
+            <p className="text-[10px] mt-0.5">执行任务后会自动记录</p>
+          </div>
+        ) : (
+          <div className="max-h-[calc(100vh-380px)] overflow-y-auto space-y-1">
+            {store.history.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => store.selectExecution(item.id)}
+                className={`w-full text-left px-2.5 py-2 rounded-lg transition-colors text-xs group ${
+                  isSelected(item.id)
+                    ? 'bg-primary/10 border border-primary/30'
+                    : 'hover:bg-default-100 border border-transparent'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-1">
+                  <span className="font-medium truncate flex-1">{item.description}</span>
+                  <StatusBadge status={item.status} />
+                </div>
+                <div className="flex items-center justify-between mt-1 text-[10px] text-default-400">
+                  <span>{new Date(item.startedAt).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+                  <span className="flex items-center gap-1.5">
+                    {item.durationMs != null && (
+                      <span>{(item.durationMs / 1000).toFixed(1)}s</span>
+                    )}
+                    {item.reviewScore != null && (
+                      <span className={item.reviewScore >= 0.8 ? 'text-success' : item.reviewScore >= 0.6 ? 'text-warning' : 'text-danger'}>
+                        {Math.round(item.reviewScore * 100)}%
+                      </span>
+                    )}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-2 border-t border-default-100 mt-2">
+            <Button
+              variant="light"
+              size="sm"
+              isDisabled={page === 0}
+              onPress={() => setPage(p => Math.max(0, p - 1))}
+            >
+              <Icon icon="lucide:chevron-left" className="size-3.5" />
+            </Button>
+            <span className="text-[10px] text-default-400">{page + 1} / {totalPages}</span>
+            <Button
+              variant="light"
+              size="sm"
+              isDisabled={page >= totalPages - 1}
+              onPress={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+            >
+              <Icon icon="lucide:chevron-right" className="size-3.5" />
+            </Button>
+          </div>
+        )}
+      </Card.Content>
+    </Card>
+  )
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const color = status === 'complete' ? 'success' :
+    status === 'error' ? 'danger' :
+    status === 'stopped' ? 'warning' :
+    status === 'running' ? 'primary' : 'default'
+  const label = status === 'complete' ? '完成' :
+    status === 'error' ? '失败' :
+    status === 'stopped' ? '停止' :
+    status === 'running' ? '运行' : status
+  return <Chip size="sm" variant="flat" color={color} className="text-[10px] shrink-0">{label}</Chip>
+}
+
+// ── History Detail View ──────────────────────────────────────────
+
+function HistoryDetailView({ viewMode, selectedJobId, taskDesc, cronJobs }: {
+  viewMode: 'flow' | 'topology'
+  selectedJobId: string
+  taskDesc: string
+  cronJobs: OpenClawCronJob[]
+}) {
+  const store = useTaskBoardStore()
+  const detail = store.selectedExecution
+  const logEndRef = useRef<HTMLDivElement>(null)
+
+  if (!detail) return null
+
+  return (
+    <div className="flex flex-col gap-3">
+      {/* Back button + title */}
+      <div className="flex items-center gap-2">
+        <Button variant="light" size="sm" onPress={() => store.clearHistoryView()}>
+          <Icon icon="lucide:arrow-left" className="size-4" />
+        </Button>
+        <h3 className="text-sm font-semibold flex-1 truncate">{detail.description}</h3>
+        <StatusBadge status={detail.status} />
+        {detail.reviewScore != null && (
+          <Chip
+            size="sm"
+            color={detail.reviewScore >= 0.8 ? 'success' : detail.reviewScore >= 0.6 ? 'warning' : 'danger'}
+            variant="flat"
+          >
+            <Icon icon="lucide:sparkles" className="size-3 mr-0.5" />
+            {Math.round(detail.reviewScore * 100)}%
+          </Chip>
+        )}
+      </div>
+
+      {/* Flow Board or Topology View */}
+      {viewMode === 'topology' ? (
+        <TaskTopologyView selectedJobId={selectedJobId} taskDesc={taskDesc} cronJobs={cronJobs} />
+      ) : (
+        <HistoryFlowBoard detail={detail} />
+      )}
+
+      {/* Review section — prominently displayed */}
+      {detail.reviewScore != null && (
+        <Card className="border-amber-200 bg-amber-50/50">
+          <Card.Header className="pb-0 pt-2 px-3">
+            <div className="flex items-center gap-2">
+              <Icon icon="lucide:sparkles" className="size-4 text-amber-600" />
+              <h3 className="text-sm font-semibold text-amber-800">复盘评估</h3>
+              <Chip
+                size="sm"
+                color={detail.reviewScore >= 0.8 ? 'success' : detail.reviewScore >= 0.6 ? 'warning' : 'danger'}
+                variant="flat"
+              >
+                综合评分: {Math.round(detail.reviewScore * 100)}%
+              </Chip>
+            </div>
+          </Card.Header>
+          <Card.Content className="pt-1.5 pb-3 px-3">
+            <div className="space-y-2">
+              {detail.reviewSummary && (
+                <div>
+                  <p className="text-[11px] font-medium text-amber-700 mb-0.5">复盘总结</p>
+                  <div className="text-xs p-2.5 bg-white/70 rounded-lg border border-amber-200 max-h-52 overflow-y-auto">
+                    <Markdown>{detail.reviewSummary}</Markdown>
+                  </div>
+                </div>
+              )}
+              {detail.betterSolution && (
+                <div>
+                  <p className="text-[11px] font-medium text-amber-700 mb-0.5">改进方向</p>
+                  <div className="text-xs p-2.5 bg-primary/5 rounded-lg border border-primary/20 max-h-44 overflow-y-auto">
+                    <Markdown>{detail.betterSolution}</Markdown>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card.Content>
+        </Card>
+      )}
+
+      {/* Main content: three-section monitor + detail */}
+      <div className="grid grid-cols-[1fr_1fr] gap-3">
+        <div className="flex flex-col gap-2 min-w-0">
+          <HistoryThoughtPanel thoughts={detail.thoughts ?? []} />
+          <HistoryToolCallPanel toolCalls={detail.toolCalls ?? []} />
+          <HistoryStreamOutputPanel logEndRef={logEndRef} steps={detail.steps ?? []} />
+        </div>
+        <HistoryStepDetailPanel detail={detail} />
+      </div>
+    </div>
+  )
+}
+
+// ── History Flow Board ───────────────────────────────────────────
+
+function HistoryFlowBoard({ detail }: { detail: import('@/api/task-board').TaskBoardExecutionDetail }) {
+  const isComplete = detail.status === 'complete'
+  const isError = detail.status === 'error'
+
+  const getPhaseStatus = (key: string): 'pending' | 'active' | 'done' | 'error' => {
+    const stepsInPhase = detail.steps.filter(s => s.phase === key)
+    if (stepsInPhase.length === 0) return 'pending'
+    const hasError = stepsInPhase.some(s => s.status === 'error')
+    if (hasError) return 'error'
+    const allDone = stepsInPhase.every(s => s.status === 'done')
+    if (allDone) return 'done'
+    return 'active'
+  }
+
+  const stepsByPhase = useMemo(() => {
+    const map: Record<string, typeof detail.steps> = { prepare: [], execute: [], review: [] }
+    for (const s of detail.steps) {
+      if (map[s.phase]) map[s.phase].push(s)
+    }
+    return map
+  }, [detail.steps])
+
+  return (
+    <Card className="border-primary/10 bg-gradient-to-br from-default-50 to-primary/[0.03] overflow-visible">
+      <Card.Header className="pb-0 pt-2 px-3">
+        <div className="flex items-center gap-1.5">
+          <Icon icon="lucide:workflow" className="size-3.5 text-primary" />
+          <h3 className="text-xs font-semibold">执行流程</h3>
+          {isComplete && <Chip size="sm" variant="flat" color="success" className="text-[10px]">完成</Chip>}
+          {isError && <Chip size="sm" color="danger" variant="flat" className="text-[10px]">出错</Chip>}
+        </div>
+      </Card.Header>
+      <Card.Content className="pt-1.5 pb-2 px-3">
+        <div className="flex items-start justify-center gap-0 flex-wrap">
+          {FLOW_PHASES.flatMap((phase, idx) => [
+            <div key={`hcol-${phase.key}`} className="flex flex-col items-center">
+              <PhaseNode phase={phase} status={getPhaseStatus(phase.key)} />
+              {stepsByPhase[phase.key].length > 0 && (
+                <div className="mt-1 flex flex-col items-center gap-0">
+                  {stepsByPhase[phase.key].map((step, sIdx) => (
+                    <React.Fragment key={step.id}>
+                      {sIdx === 0 && <StepConnector active />}
+                      {sIdx > 0 && <StepConnector active />}
+                      <StepNode step={step} />
+                    </React.Fragment>
+                  ))}
+                </div>
+              )}
+            </div>,
+            <ConnectorWrapper key={`hconn-${idx}`}>
+              <ConnectorLine active={
+                getPhaseStatus(phase.key) === 'done' || getPhaseStatus(FLOW_PHASES[idx + 1]?.key ?? '') !== 'pending'
+              } />
+            </ConnectorWrapper>,
+          ])}
+          <div className="flex flex-col items-center">
+            <CompleteNode
+              done={isComplete}
+              error={isError}
+              pending={!isComplete && !isError}
+            />
+          </div>
+        </div>
+      </Card.Content>
+    </Card>
+  )
+}
+
+// ── History Panel Components ─────────────────────────────────────
+
+function HistoryThoughtPanel({ thoughts }: { thoughts: TaskBoardThoughtSummary[] }) {
+  if (thoughts.length === 0) {
+    return (
+      <Widget>
+        <Widget.Header>
+          <div className="flex items-center gap-2">
+            <Icon icon="lucide:brain" className="size-4 text-purple-500" />
+            <Widget.Title>思考过程</Widget.Title>
+          </div>
+        </Widget.Header>
+        <Widget.Content>
+          <span className="text-xs text-default-400">暂无思考记录</span>
+        </Widget.Content>
+      </Widget>
+    )
+  }
+
+  return (
+    <Widget>
+      <Widget.Header>
+        <div className="flex items-center gap-2">
+          <Icon icon="lucide:brain" className="size-4 text-purple-500" />
+          <Widget.Title>思考过程</Widget.Title>
+          <Chip size="sm" variant="flat" color="secondary">{thoughts.length}</Chip>
+        </div>
+      </Widget.Header>
+      <Widget.Content>
+        <div className="max-h-[360px] overflow-y-auto space-y-2">
+          {[...thoughts].reverse().map((thought, idx) => (
+            <ChainOfThought.Root key={thought.id} isStreaming={false} defaultOpen={idx === 0}>
+              <ChainOfThought.Trigger>
+                <span className="text-xs flex items-center gap-1.5">
+                  <Icon icon="lucide:brain" className="size-3 text-purple-500" />
+                  AI 思考
+                  <span className="text-[10px] text-default-400 font-normal">
+                    {new Date(thought.createdAt).toLocaleTimeString()}
+                  </span>
+                </span>
+              </ChainOfThought.Trigger>
+              <ChainOfThought.Content>
+                <ChainOfThought.Steps>
+                  <ChainOfThought.Step>
+                    <div className="max-h-56 overflow-auto text-xs leading-relaxed">
+                      <Markdown>{thought.content}</Markdown>
+                    </div>
+                  </ChainOfThought.Step>
+                </ChainOfThought.Steps>
+              </ChainOfThought.Content>
+            </ChainOfThought.Root>
+          ))}
+        </div>
+      </Widget.Content>
+    </Widget>
+  )
+}
+
+function HistoryToolCallPanel({ toolCalls }: { toolCalls: TaskBoardToolCallSummary[] }) {
+  if (toolCalls.length === 0) {
+    return (
+      <Widget>
+        <Widget.Header>
+          <div className="flex items-center gap-2">
+            <Icon icon="lucide:wrench" className="size-4 text-amber-500" />
+            <Widget.Title>工具调用</Widget.Title>
+          </div>
+        </Widget.Header>
+        <Widget.Content>
+          <span className="text-xs text-default-400">暂无工具调用</span>
+        </Widget.Content>
+      </Widget>
+    )
+  }
+
+  const activeCalls = toolCalls.filter(tc => !tc.completedAt && !tc.error)
+  const completedCalls = toolCalls.filter(tc => tc.completedAt || tc.error)
+
+  return (
+    <Widget>
+      <Widget.Header>
+        <div className="flex items-center gap-2">
+          <Icon icon="lucide:wrench" className="size-4 text-amber-500" />
+          <Widget.Title>工具调用</Widget.Title>
+          <Chip size="sm" variant="flat">{toolCalls.length}</Chip>
+        </div>
+      </Widget.Header>
+      <Widget.Content>
+        <div className="max-h-[340px] overflow-y-auto space-y-2">
+          {activeCalls.map((tc) => (
+            <ChatTool.Root key={tc.id} state="input-available" toolName={tc.name} isExpandable triggerPrefix="调用">
+              {tc.args && <ChatTool.Args input={tryParseJSON(tc.args) ?? tc.args} />}
+              <ChatTool.Meta toolCallId={tc.id} />
+            </ChatTool.Root>
+          ))}
+          {[...completedCalls].reverse().map((tc) => {
+            const state: 'output-available' | 'output-error' =
+              tc.error ? 'output-error' : 'output-available'
+            return (
+              <ChatTool.Root key={tc.id} state={state} toolName={tc.name} isExpandable triggerPrefix="调用">
+                {tc.args && <ChatTool.Args input={tryParseJSON(tc.args) ?? tc.args} />}
+                {tc.result && (
+                  <ChatTool.Result value={
+                    tc.result.length > 600 ? tc.result.slice(0, 600) + '\n\n*(结果已截断)*' : tc.result
+                  } />
+                )}
+                {tc.error && <ChatTool.Error errorText={tc.error} />}
+                <ChatTool.Meta toolCallId={tc.id} />
+              </ChatTool.Root>
+            )
+          })}
+        </div>
+      </Widget.Content>
+    </Widget>
+  )
+}
+
+function HistoryStreamOutputPanel({ logEndRef, steps }: { logEndRef: React.RefObject<HTMLDivElement | null>; steps: TaskBoardStepSummary[] }) {
+  return (
+    <Widget>
+      <Widget.Header>
+        <div className="flex items-center gap-2">
+          <Icon icon="lucide:file-text" className="size-4 text-blue-500" />
+          <Widget.Title>步骤输出</Widget.Title>
+          <Chip size="sm" variant="flat">{steps.length} 步</Chip>
+        </div>
+      </Widget.Header>
+      <Widget.Content>
+        <ChatConversation.Root className="min-h-[100px] max-h-[340px] border rounded-lg border-default-200 bg-default-50/50">
+          <ChatConversation.Content>
+            {steps.length === 0 ? (
+              <div className="text-xs text-default-400 p-3">暂无步骤记录</div>
+            ) : (
+              steps.map((step) => (
+                <ChatMessage.Assistant key={step.id}>
+                  <ChatMessage.Avatar
+                    show
+                    fallback={step.status === 'done' ? '✓' : step.status === 'error' ? '✗' : '·'}
+                    alt={step.status}
+                  />
+                  <ChatMessage.Bubble variant={
+                    step.status === 'error' ? 'flat' :
+                    step.status === 'done' ? 'soft' : 'soft'
+                  }>
+                    <ChatMessage.Content>
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`text-xs font-medium ${
+                            step.status === 'error' ? 'text-danger' : 'text-default-700'
+                          }`}>{step.name}</span>
+                          <Chip size="sm" variant="flat" color={
+                            step.status === 'done' ? 'success' :
+                            step.status === 'error' ? 'danger' : 'default'
+                          } className="text-[10px]">
+                            {step.status === 'done' ? '完成' : step.status === 'error' ? '失败' : step.status}
+                          </Chip>
+                        </div>
+                        {step.output && (
+                          <div className="text-[11px] text-default-500 max-h-32 overflow-y-auto mt-0.5">
+                            <Markdown>{step.output}</Markdown>
+                          </div>
+                        )}
+                        {step.error && (
+                          <div className="text-[11px] text-danger">{step.error}</div>
+                        )}
+                      </div>
+                    </ChatMessage.Content>
+                  </ChatMessage.Bubble>
+                </ChatMessage.Assistant>
+              ))
+            )}
+            <ChatConversation.ScrollAnchor />
+            <div ref={logEndRef} />
+          </ChatConversation.Content>
+        </ChatConversation.Root>
+      </Widget.Content>
+    </Widget>
+  )
+}
+
+function HistoryStepDetailPanel({ detail }: { detail: import('@/api/task-board').TaskBoardExecutionDetail }) {
+  const [activeTab, setActiveTab] = useState<'steps' | 'review'>('steps')
+
+  return (
+    <div className="flex flex-col gap-3 overflow-y-auto max-h-[500px]">
+      {/* Execution Info */}
+      <Widget>
+        <Widget.Header>
+          <Widget.Title>执行详情</Widget.Title>
+        </Widget.Header>
+        <Widget.Content>
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between">
+              <span className="text-default-500">状态</span>
+              <StatusBadge status={detail.status} />
+            </div>
+            <div className="flex justify-between">
+              <span className="text-default-500">Agent</span>
+              <span>{detail.agentId}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-default-500">开始时间</span>
+              <span>{new Date(detail.startedAt).toLocaleString('zh-CN')}</span>
+            </div>
+            {detail.completedAt && (
+              <div className="flex justify-between">
+                <span className="text-default-500">完成时间</span>
+                <span>{new Date(detail.completedAt).toLocaleString('zh-CN')}</span>
+              </div>
+            )}
+            {detail.durationMs != null && (
+              <div className="flex justify-between">
+                <span className="text-default-500">总耗时</span>
+                <span className="font-medium">{(detail.durationMs / 1000).toFixed(1)}s</span>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <span className="text-default-500">步骤数</span>
+              <span>{detail.steps.length} 步</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-default-500">工具调用</span>
+              <span>{detail.toolCalls.length} 次</span>
+            </div>
+          </div>
+        </Widget.Content>
+      </Widget>
+
+      {/* Steps list */}
+      <Widget>
+        <Widget.Header>
+          <div className="flex items-center gap-2">
+            <Icon icon="lucide:list-checks" className="size-3.5" />
+            <Widget.Title>执行步骤</Widget.Title>
+          </div>
+        </Widget.Header>
+        <Widget.Content>
+          {detail.steps.length === 0 ? (
+            <p className="text-xs text-default-400">暂无步骤</p>
+          ) : (
+            <div className="space-y-1.5 max-h-52 overflow-y-auto">
+              {detail.steps.map((step, idx) => (
+                <div key={step.id} className="flex items-start gap-2 p-2 rounded-lg bg-default-50 text-xs">
+                  <span className="text-default-400 tabular-nums w-4 shrink-0">{idx + 1}.</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium">{step.name}</p>
+                    {step.output && (
+                      <p className="text-default-500 mt-0.5 truncate">{step.output.slice(0, 100)}</p>
+                    )}
+                  </div>
+                  <Chip size="sm" variant="flat" color={
+                    step.status === 'done' ? 'success' :
+                    step.status === 'error' ? 'danger' :
+                    step.status === 'running' ? 'primary' : 'default'
+                  } className="text-[10px] shrink-0">
+                    {step.status === 'done' ? '完成' : step.status === 'error' ? '失败' : step.status}
+                  </Chip>
+                </div>
+              ))}
+            </div>
+          )}
+        </Widget.Content>
+      </Widget>
+
+      {/* Result */}
+      {detail.result && (
+        <Widget>
+          <Widget.Header>
+            <Widget.Title>执行结果</Widget.Title>
+          </Widget.Header>
+          <Widget.Content>
+            <div className="max-h-60 overflow-y-auto text-xs">
+              <Markdown>{detail.result}</Markdown>
+            </div>
+          </Widget.Content>
+        </Widget>
+      )}
+    </div>
   )
 }
 

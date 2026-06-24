@@ -89,6 +89,15 @@ func ConfigureTaskBoardStore(db *sql.DB) error {
 			duration_ms INTEGER,
 			FOREIGN KEY (step_id) REFERENCES task_board_steps(id)
 		);
+		CREATE TABLE IF NOT EXISTS task_board_thoughts (
+			id TEXT PRIMARY KEY,
+			execution_id TEXT NOT NULL,
+			step_id TEXT NOT NULL DEFAULT '',
+			content TEXT NOT NULL DEFAULT '',
+			sort_order INTEGER NOT NULL DEFAULT 0,
+			created_at TEXT NOT NULL,
+			FOREIGN KEY (execution_id) REFERENCES task_board_executions(id)
+		);
 	`)
 	if err == nil {
 		db.Exec(`ALTER TABLE task_board_executions ADD COLUMN result TEXT`)
@@ -246,10 +255,20 @@ type TaskBoardToolCallSummary struct {
 	DurationMs  *int64 `json:"durationMs,omitempty"`
 }
 
+type TaskBoardThoughtSummary struct {
+	ID          string `json:"id"`
+	ExecutionID string `json:"executionId"`
+	StepID      string `json:"stepId"`
+	Content     string `json:"content"`
+	SortOrder   int    `json:"sortOrder"`
+	CreatedAt   string `json:"createdAt"`
+}
+
 type TaskBoardExecutionDetail struct {
 	TaskBoardExecutionSummary
 	Steps     []TaskBoardStepSummary     `json:"steps"`
 	ToolCalls []TaskBoardToolCallSummary `json:"toolCalls"`
+	Thoughts  []TaskBoardThoughtSummary  `json:"thoughts"`
 }
 
 type TaskBoardListInput struct {
@@ -452,6 +471,17 @@ func TaskBoardGetExecution(ctx context.Context, input *TaskBoardGetInput) (*Task
 		}
 	}
 	if detail.ToolCalls == nil { detail.ToolCalls = []TaskBoardToolCallSummary{} }
+	// Load thoughts
+	thRows, err := taskBoardDB.QueryContext(ctx, `SELECT id, execution_id, COALESCE(step_id,''), content, sort_order, created_at FROM task_board_thoughts WHERE execution_id = ? ORDER BY sort_order ASC`, input.ID)
+	if err == nil {
+		defer thRows.Close()
+		for thRows.Next() {
+			var th TaskBoardThoughtSummary
+			thRows.Scan(&th.ID, &th.ExecutionID, &th.StepID, &th.Content, &th.SortOrder, &th.CreatedAt)
+			detail.Thoughts = append(detail.Thoughts, th)
+		}
+	}
+	if detail.Thoughts == nil { detail.Thoughts = []TaskBoardThoughtSummary{} }
 	return &TaskBoardExecutionDetailOutput{Body: detail}, nil
 }
 
@@ -562,6 +592,12 @@ func TaskBoardExecuteStream(ctx context.Context, input *TaskBoardStreamInput, se
 	var score float64
 	var summary string
 	stepOrder := 0
+	thoughtOrder := 0
+	sendAndPersistThought := func(stepID, content string) {
+		sendThought(send, id, stepID, content)
+		thoughtOrder++
+		persistThought(ctx, id, stepID, content, thoughtOrder)
+	}
 
 	// ── META ────────────────────────────────────────────────
 	_ = send.Data(TaskBoardStreamMetaEvent{
@@ -582,7 +618,7 @@ func TaskBoardExecuteStream(ctx context.Context, input *TaskBoardStreamInput, se
 	addStepRecord(ctx, id, prepStepID, "查询任务配置", "prepare", "running", stepOrder)
 	sendStep(send, id, prepStepID, "查询任务配置", "prepare", "running", 10)
 
-	sendThought(send, id, prepStepID, fmt.Sprintf("正在连接 OpenClaw Gateway，查询定时任务 `%s` 的配置信息。\n\n需要确认任务是否存在、调度参数是否匹配，以及 Agent 绑定关系。", cronJobID))
+	sendAndPersistThought(prepStepID, fmt.Sprintf("正在连接 OpenClaw Gateway，查询定时任务 `%s` 的配置信息。\n\n需要确认任务是否存在、调度参数是否匹配，以及 Agent 绑定关系。", cronJobID))
 	_ = send.Data(TaskBoardStreamLogEvent{ExecutionID: id, Level: "info", Message: "正在连接 OpenClaw Gateway...", Timestamp: ts()})
 
 	var jobDetail string
@@ -602,7 +638,7 @@ func TaskBoardExecuteStream(ctx context.Context, input *TaskBoardStreamInput, se
 		}
 	} else {
 		jobDetail = description
-		sendThought(send, id, prepStepID, fmt.Sprintf("这是一个自由任务，没有绑定具体的定时任务。\n\n任务描述: %s\n\n将直接通过 Agent 处理此任务。", description))
+		sendAndPersistThought(prepStepID, fmt.Sprintf("这是一个自由任务，没有绑定具体的定时任务。\n\n任务描述: %s\n\n将直接通过 Agent 处理此任务。", description))
 	}
 
 	updateStepRecord(ctx, prepStepID, "done", ts())
@@ -616,7 +652,7 @@ func TaskBoardExecuteStream(ctx context.Context, input *TaskBoardStreamInput, se
 	// ═══════════════════════════════════════════════════════════
 	sendPhase(send, id, "execute", "started", 25)
 
-	sendThought(send, id, prepStepID, fmt.Sprintf("准备阶段完成，进入执行阶段。\n\n已确认任务配置，接下来将通过 Gateway RPC 调用 `cron.run` 以 **force 模式** 强制触发任务，绕过调度周期。"))
+	sendAndPersistThought(prepStepID, fmt.Sprintf("准备阶段完成，进入执行阶段。\n\n已确认任务配置，接下来将通过 Gateway RPC 调用 `cron.run` 以 **force 模式** 强制触发任务，绕过调度周期。"))
 
 	stepOrder++
 	execStepID := stepID()
@@ -630,7 +666,7 @@ func TaskBoardExecuteStream(ctx context.Context, input *TaskBoardStreamInput, se
 		// REAL execution: call cron.run on the gateway
 		execToolID := fmt.Sprintf("tc-%s-cron-run", id)
 		sendToolCall(send, id, execStepID, execToolID, "gateway.cron.run", fmt.Sprintf(`{"id": "%s", "mode": "force"}`, cronJobID))
-		sendThought(send, id, execStepID, "向 OpenClaw Gateway 发送 `cron.run` RPC 调用，以 force 模式强制触发定时任务。\n\n此调用会绕过 Cron 调度周期，立即执行一次任务。")
+		sendAndPersistThought(execStepID, "向 OpenClaw Gateway 发送 `cron.run` RPC 调用，以 force 模式强制触发定时任务。\n\n此调用会绕过 Cron 调度周期，立即执行一次任务。")
 
 		raw, err := openclawGatewayCall(ctx, 60*time.Second, "cron.run", map[string]any{
 			"id":   cronJobID,
@@ -674,7 +710,7 @@ func TaskBoardExecuteStream(ctx context.Context, input *TaskBoardStreamInput, se
 	monitorStepID := stepID()
 	addStepRecord(ctx, id, monitorStepID, "监控执行状态", "execute", "running", stepOrder)
 	sendStep(send, id, monitorStepID, "监控执行状态", "execute", "running", 50)
-	sendThought(send, id, monitorStepID, "任务已触发，进入监控阶段。\n\n通过轮询 `cron.runs` API 检查最新执行记录的状态变化，间隔 2 秒，最多等待 60 秒。\n\n等待 delivery 状态从 pending → delivered → completed...")
+	sendAndPersistThought(monitorStepID, "任务已触发，进入监控阶段。\n\n通过轮询 `cron.runs` API 检查最新执行记录的状态变化，间隔 2 秒，最多等待 60 秒。\n\n等待 delivery 状态从 pending → delivered → completed...")
 	_ = send.Data(TaskBoardStreamLogEvent{ExecutionID: id, Level: "info", Message: "等待任务执行完成...", Timestamp: ts()})
 
 	if cronJobID != "" {
@@ -704,7 +740,7 @@ func TaskBoardExecuteStream(ctx context.Context, input *TaskBoardStreamInput, se
 	resultStepID := stepID()
 	addStepRecord(ctx, id, resultStepID, "获取执行结果", "execute", "running", stepOrder)
 	sendStep(send, id, resultStepID, "获取执行结果", "execute", "running", 75)
-	sendThought(send, id, resultStepID, "监控完成，执行结果已就绪。\n\n正在从 Gateway 拉取最新的执行记录，包括运行时长、输出内容和错误信息。")
+	sendAndPersistThought(resultStepID, "监控完成，执行结果已就绪。\n\n正在从 Gateway 拉取最新的执行记录，包括运行时长、输出内容和错误信息。")
 
 	if cronJobID != "" && finalStatus != "stopped" && finalStatus != "error" {
 		resultToolID := fmt.Sprintf("tc-%s-cron-runs-result", id)
@@ -717,6 +753,11 @@ func TaskBoardExecuteStream(ctx context.Context, input *TaskBoardStreamInput, se
 		if err == nil {
 			finalResult = extractLastRunResult(raw, cronJobID)
 			sendToolResult(send, id, resultStepID, resultToolID, finalResult, "", resultDur)
+			// Send the agent's actual output as a thought so it shows in the thinking panel
+			agentOutput := extractLastRunOutput(raw)
+			if agentOutput != "" {
+				sendAndPersistThought(resultStepID, "## 📤 OpenClaw Agent 实际输出\n\n"+agentOutput)
+			}
 		} else {
 			finalResult = fmt.Sprintf("执行完成 (任务: %s)\n结果获取: %v", cronJobID, err)
 			sendToolResult(send, id, resultStepID, resultToolID, "", err.Error(), resultDur)
@@ -740,7 +781,7 @@ func TaskBoardExecuteStream(ctx context.Context, input *TaskBoardStreamInput, se
 	addStepRecord(ctx, id, reviewStepID, "复盘评估", "review", "running", stepOrder)
 	sendStep(send, id, reviewStepID, "复盘评估", "review", "running", 90)
 
-	sendThought(send, id, reviewStepID, "执行阶段完成，进入复盘评估。\n\nAI 将对本次执行进行多维度评估：\n- **执行是否成功**: 检查 Gateway 返回的状态\n- **耗时分析**: 评估执行时长是否合理\n- **输出质量**: 分析输出内容的完整性和准确性\n- **改进建议**: 识别可优化的环节")
+	sendAndPersistThought(reviewStepID, "执行阶段完成，进入复盘评估。\n\nAI 将对本次执行进行多维度评估：\n- **执行是否成功**: 检查 Gateway 返回的状态\n- **耗时分析**: 评估执行时长是否合理\n- **输出质量**: 分析输出内容的完整性和准确性\n- **改进建议**: 识别可优化的环节")
 
 	score = 0.0
 	summary = ""
@@ -784,8 +825,8 @@ func TaskBoardExecuteStream(ctx context.Context, input *TaskBoardStreamInput, se
 
 	if taskBoardDB != nil {
 		taskBoardMu.Lock()
-		taskBoardDB.ExecContext(ctx, `UPDATE task_board_executions SET status = ?, updated_at = ?, completed_at = ?, duration_ms = ?, result = ?, error_msg = ? WHERE id = ?`,
-			finalStatus, ts(), ts(), durationMs, finalResult, finalError, id)
+		taskBoardDB.ExecContext(ctx, `UPDATE task_board_executions SET status = ?, updated_at = ?, completed_at = ?, duration_ms = ?, result = ?, error_msg = ?, review_score = ?, review_summary = ? WHERE id = ?`,
+			finalStatus, ts(), ts(), durationMs, finalResult, finalError, score, summary, id)
 		taskBoardMu.Unlock()
 	}
 }
@@ -930,26 +971,35 @@ func extractRunStatus(raw []byte) string {
 	return run.Status
 }
 
-func extractLastRunResult(raw []byte, jobID string) string {
+type cronRunDetail struct {
+	Status         string `json:"status"`
+	DeliveryStatus string `json:"deliveryStatus"`
+	StartedAt      int64  `json:"startedAt"`
+	DurationMs     int64  `json:"durationMs"`
+	Error          string `json:"error"`
+	Output         string `json:"output"`
+}
+
+func extractRunDetail(raw []byte) (run *cronRunDetail, ok bool) {
 	var result struct {
 		Payload struct {
-			Runs []struct {
-				Status         string `json:"status"`
-				DeliveryStatus string `json:"deliveryStatus"`
-				StartedAt      int64  `json:"startedAt"`
-				DurationMs     int64  `json:"durationMs"`
-				Error          string `json:"error"`
-				Output         string `json:"output"`
-			} `json:"runs"`
+			Runs []cronRunDetail `json:"runs"`
 		} `json:"payload"`
 	}
 	if err := json.Unmarshal(raw, &result); err != nil {
-		return fmt.Sprintf("定时任务 %s 已触发执行。", jobID)
+		return nil, false
 	}
 	if len(result.Payload.Runs) == 0 {
-		return fmt.Sprintf("定时任务 %s 已触发，等待首次执行记录。", jobID)
+		return nil, false
 	}
-	run := result.Payload.Runs[0]
+	return &result.Payload.Runs[0], true
+}
+
+func extractLastRunResult(raw []byte, jobID string) string {
+	run, ok := extractRunDetail(raw)
+	if !ok {
+		return fmt.Sprintf("定时任务 %s 已触发执行。", jobID)
+	}
 	status := "成功"
 	if run.Status == "error" || run.Status == "failed" {
 		status = "失败"
@@ -962,8 +1012,19 @@ func extractLastRunResult(raw []byte, jobID string) string {
 	if output == "" {
 		output = run.Error
 	}
+	if output == "" {
+		output = "(无输出内容)"
+	}
 	return fmt.Sprintf("📊 定时任务执行报告\n\n━━━━━━━━━━━━━━━━━━━━\n📌 任务: %s\n⏰ 执行时间: %s\n📋 执行状态: %s\n⏱ 耗时: %dms\n\n%s\n━━━━━━━━━━━━━━━━━━━━",
 		jobID, timeStr, status, run.DurationMs, output)
+}
+
+func extractLastRunOutput(raw []byte) string {
+	run, ok := extractRunDetail(raw)
+	if !ok || run.Output == "" {
+		return ""
+	}
+	return run.Output
 }
 
 // ── SSE send helpers ────────────────────────────────────────────
@@ -1008,6 +1069,14 @@ func sendToolResult(send sse.Sender, id, stepID, callID, result, errMsg string, 
 }
 
 // ── DB helpers ─────────────────────────────────────────────────
+
+func persistThought(ctx context.Context, execID, stepID, content string, order int) {
+	if taskBoardDB == nil { return }
+	id := fmt.Sprintf("th-%d", time.Now().UnixNano())
+	taskBoardMu.Lock()
+	defer taskBoardMu.Unlock()
+	taskBoardDB.ExecContext(ctx, `INSERT INTO task_board_thoughts (id, execution_id, step_id, content, sort_order, created_at) VALUES (?, ?, ?, ?, ?, ?)`, id, execID, stepID, content, order, ts())
+}
 
 func addStepRecord(ctx context.Context, execID, id, name, phase, status string, order int) {
 	if taskBoardDB == nil { return }

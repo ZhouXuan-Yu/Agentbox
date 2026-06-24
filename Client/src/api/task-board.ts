@@ -61,9 +61,19 @@ export type TaskBoardToolCallSummary = {
   durationMs?: number
 }
 
+export type TaskBoardThoughtSummary = {
+  id: string
+  executionId: string
+  stepId: string
+  content: string
+  sortOrder: number
+  createdAt: string
+}
+
 export type TaskBoardExecutionDetail = TaskBoardExecutionSummary & {
   steps: TaskBoardStepSummary[]
   toolCalls: TaskBoardToolCallSummary[]
+  thoughts: TaskBoardThoughtSummary[]
 }
 
 export type TaskBoardListResponse = {

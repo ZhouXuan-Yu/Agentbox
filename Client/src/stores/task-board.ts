@@ -82,11 +82,15 @@ interface TaskBoardStore {
   selectedExecution: TaskBoardExecutionDetail | null
   selectedExecutionLoading: boolean
 
+  // History viewing mode (reviews the past)
+  isViewingHistory: boolean
+
   // Actions
   loadKPI: () => Promise<void>
   loadHistory: (limit?: number, offset?: number, status?: string) => Promise<void>
   loadExecution: (id: string) => Promise<void>
   selectExecution: (id: string) => Promise<void>
+  clearHistoryView: () => void
 
   startExecution: (cronJobId?: string, taskDesc?: string, agentId?: string) => void
   stopExecution: () => Promise<void>
@@ -119,6 +123,7 @@ export const useTaskBoardStore = create<TaskBoardStore>((set, get) => ({
   historyLoading: false,
   selectedExecution: null,
   selectedExecutionLoading: false,
+  isViewingHistory: false,
 
   // ── KPI ──────────────────────────────────────────────────
 
@@ -159,7 +164,12 @@ export const useTaskBoardStore = create<TaskBoardStore>((set, get) => ({
   },
 
   selectExecution: async (id: string) => {
+    set({ isViewingHistory: true })
     await get().loadExecution(id)
+  },
+
+  clearHistoryView: () => {
+    set({ isViewingHistory: false, selectedExecution: null })
   },
 
   // ── Live execution ────────────────────────────────────────
@@ -176,6 +186,7 @@ export const useTaskBoardStore = create<TaskBoardStore>((set, get) => ({
       isConnected: false,    // false until 'open' fires
       isReconnecting: false,
       connectionError: null,
+      isViewingHistory: false,
       completedNormally: false,
       activeSteps: [],
       liveLogs: [],
@@ -356,23 +367,25 @@ export const useTaskBoardStore = create<TaskBoardStore>((set, get) => ({
         currentPhase: data.status,
         currentProgress: 100,
         isConnected: false,
+        completedNormally: true,  // prevent error handler from showing false error
       }))
       // Auto-refresh KPI and history
       get().loadKPI()
       get().loadHistory()
       // Close SSE to prevent EventSource auto-reconnection
-      // from triggering a brand-new execution loop
       get().closeStream()
     })
 
-    // NOTE: es.onerror is set above (lines 194-207) — do NOT overwrite it here.
-    // If we reach an error after receiving meta (execution in progress), close the
-    // stream to prevent EventSource auto-reconnect from spawning a duplicate execution.
+    // Error handler: only trigger on genuine interruptions, NOT after normal completion.
     es.addEventListener('error', () => {
       const state = get()
+      // If execution completed normally, close was intentional — suppress error.
+      if (state.completedNormally) {
+        get().closeStream()
+        return
+      }
       if (state.activeExecutionId) {
-        // Execution was already in progress — a reconnect would start a new one.
-        // Close the stream and let the user restart manually if needed.
+        // Execution was in progress and stream broke unexpectedly.
         get().closeStream()
         set({ connectionError: '执行流中断，请手动重新触发' })
       }
@@ -395,12 +408,15 @@ export const useTaskBoardStore = create<TaskBoardStore>((set, get) => ({
     if (es) {
       es.close()
     }
-    set({
+    set((state) => ({
       eventSource: null,
       isConnected: false,
       isReconnecting: false,
       connectionError: null,
-    })
+      // Preserve completedNormally flag — the 'complete' handler
+      // sets it before calling closeStream.
+      completedNormally: state.completedNormally,
+    }))
   },
 
   clearActiveState: () => {
@@ -418,6 +434,8 @@ export const useTaskBoardStore = create<TaskBoardStore>((set, get) => ({
       isConnected: false,
       isReconnecting: false,
       connectionError: null,
+      completedNormally: false,
+      isViewingHistory: false,
     })
   },
 }))
