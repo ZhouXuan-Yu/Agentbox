@@ -1821,7 +1821,7 @@ function accessCredentialTargetToDashboardEngine(target?: 'all' | DashboardEngin
 }
 
 function isSharedDashboardPath(pathname?: string) {
-  return pathname === '/dashboard/plugins' || pathname === '/dashboard/system'
+  return pathname === '/dashboard/plugins' || pathname === '/dashboard/system' || pathname === '/dashboard/task-board'
 }
 
 function DashboardNavbar({ activeEngine, sidebarOpen }: { activeEngine: DashboardEngine; sidebarOpen: boolean }) {

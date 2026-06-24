@@ -104,6 +104,7 @@ declare global {
   const useSearchParams: typeof import('react-router-dom').useSearchParams
   const useState: typeof import('react').useState
   const useSyncExternalStore: typeof import('react').useSyncExternalStore
+  const useTaskBoardStore: typeof import('./stores/task-board').useTaskBoardStore
   const useThemeStore: typeof import('./stores/theme').useThemeStore
   const useTransition: typeof import('react').useTransition
 }
@@ -121,6 +122,9 @@ declare global {
   // @ts-ignore
   export type { OpenClawEnvironmentLoadState } from './stores/openclaw-environment'
   import('./stores/openclaw-environment')
+  // @ts-ignore
+  export type { TaskBoardLiveLogEntry, TaskBoardLiveThought, TaskBoardLiveToolCall } from './stores/task-board'
+  import('./stores/task-board')
   // @ts-ignore
   export type { ThemeMode, ResolvedTheme, ThemeStyle, ThemeFont, ThemeColor } from './stores/theme'
   import('./stores/theme')

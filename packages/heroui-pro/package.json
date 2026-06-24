@@ -1,0 +1,77 @@
+{
+  "name": "@heroui-pro/react",
+  "version": "1.0.0-beta.6",
+  "description": "HeroUI Pro - Premium React components built with Tailwind CSS 4.0.",
+  "license": "SEE LICENSE IN LICENSE",
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./css": "./src/css/index.css",
+    "./css/*": "./src/css/*",
+    "./themes/*": "./src/css/themes/*",
+    "./dist/*": "./dist/*"
+  },
+  "files": [
+    "dist",
+    "src/css"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -p tsconfig.json --watch",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@floating-ui/dom": ">=1.7.0",
+    "@gravity-ui/icons": "^2.18.0",
+    "@internationalized/number": "3.6.7",
+    "@react-aria/utils": "3.34.1",
+    "@react-stately/utils": "3.12.1",
+    "marked": ">=18.0.5",
+    "react-is": "^19.2.7",
+    "react-markdown": ">=10.1.0",
+    "remark-breaks": ">=4.0.0",
+    "remark-gfm": ">=4.0.1",
+    "shiki": ">=4.2.0",
+    "streamdown": ">=2.5.0"
+  },
+  "peerDependencies": {
+    "@floating-ui/dom": ">=1.7.0",
+    "@heroui/react": ">=3.2.0",
+    "@heroui/styles": ">=3.2.0",
+    "@number-flow/react": ">=0.5.0",
+    "@tiptap/core": ">=3.14.0",
+    "@tiptap/extension-link": ">=3.14.0",
+    "@tiptap/extension-underline": ">=3.14.0",
+    "@tiptap/extensions": ">=3.14.0",
+    "@tiptap/pm": ">=3.14.0",
+    "@tiptap/react": ">=3.14.0",
+    "@tiptap/starter-kit": ">=3.14.0",
+    "@tiptap/suggestion": ">=3.14.0",
+    "embla-carousel": ">=8.6.0",
+    "embla-carousel-react": ">=8.6.0",
+    "motion": ">=12.12.0",
+    "react": ">=19.0.0",
+    "react-aria-components": ">=1.17.0",
+    "react-dom": ">=19.0.0",
+    "react-resizable-panels": ">=4.10.0",
+    "recharts": ">=2.0.0",
+    "tailwind-merge": ">=3.4.0",
+    "tailwind-variants": ">=3.2.0",
+    "tailwindcss": ">=4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "@types/react-is": "^19",
+    "typescript": "~6.0.3"
+  }
+}

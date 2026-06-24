@@ -18,6 +18,9 @@
     "StartupSettings": true,
     "StoredAccessCredential": true,
     "Suspense": true,
+    "TaskBoardLiveLogEntry": true,
+    "TaskBoardLiveThought": true,
+    "TaskBoardLiveToolCall": true,
     "ThemeColor": true,
     "ThemeFont": true,
     "ThemeMode": true,
@@ -110,6 +113,7 @@
     "useSearchParams": true,
     "useState": true,
     "useSyncExternalStore": true,
+    "useTaskBoardStore": true,
     "useThemeStore": true,
     "useTransition": true
   }

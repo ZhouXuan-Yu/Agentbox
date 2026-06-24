@@ -1,0 +1,10 @@
+{
+  "name": "agentbox",
+  "private": true,
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "heroui-pro",
+      "heroui-native-pro"
+    ]
+  }
+}

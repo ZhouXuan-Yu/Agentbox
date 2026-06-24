@@ -67,6 +67,11 @@ func New(ctx context.Context) (*App, error) {
 		_ = logManager.Close()
 		return nil, fmt.Errorf("configure cc-connect terminal store: %w", err)
 	}
+	if err := handlers.ConfigureTaskBoardStore(store.DB()); err != nil {
+		_ = store.Close()
+		_ = logManager.Close()
+		return nil, fmt.Errorf("configure task board store: %w", err)
+	}
 	handlers.ConfigureMaintenanceStore(store.DB())
 	handlers.ConfigureMaintenanceSQLiteRebuildHooks(hermeshandlers.RebuildHermesTerminalStore, ccconnecthandlers.RebuildCCConnectSettingsStore, ccconnecthandlers.RebuildCCConnectTerminalStore)
 	handlers.ConfigureLogManager(logManager)

@@ -143,7 +143,8 @@ func shouldLogRequestPath(path string) bool {
 		strings.HasPrefix(path, "/api/") ||
 		strings.HasPrefix(path, "/openclaw/") ||
 		strings.HasPrefix(path, "/hermes/") ||
-		strings.HasPrefix(path, "/cc-connect/")
+		strings.HasPrefix(path, "/cc-connect/") ||
+		strings.HasPrefix(path, "/task-board/")
 }
 
 func maxRequestBodyMiddleware(limit int64) func(http.Handler) http.Handler {
@@ -192,6 +193,20 @@ func hermesTaskStreamEvents() map[string]any {
 		"log":    hermeshandlers.HermesTaskStreamLogEvent{},
 		"error":  hermeshandlers.HermesTaskStreamErrorEvent{},
 		"done":   hermeshandlers.HermesTaskStreamDoneEvent{},
+	}
+}
+
+func taskBoardStreamEvents() map[string]any {
+	return map[string]any{
+		"meta":        handlers.TaskBoardStreamMetaEvent{},
+		"phase":       handlers.TaskBoardStreamPhaseEvent{},
+		"step":        handlers.TaskBoardStreamStepEvent{},
+		"log":         handlers.TaskBoardStreamLogEvent{},
+		"tool_call":   handlers.TaskBoardStreamToolCallEvent{},
+		"tool_result": handlers.TaskBoardStreamToolResultEvent{},
+		"thought":     handlers.TaskBoardStreamThoughtEvent{},
+		"review":      handlers.TaskBoardStreamReviewEvent{},
+		"complete":    handlers.TaskBoardStreamCompleteEvent{},
 	}
 }
 
@@ -2770,4 +2785,69 @@ func registerRoutes(api huma.API, authConfig *config.BackendAuthStore) {
 		Description: "通过 OpenClaw CLI 检查插件加载、registry、兼容性和 source shadowing 问题。",
 		Tags:        []string{"OpenClaw"},
 	}, openclawhandlers.GetOpenClawPluginsDoctor)
+
+	// ── Task Board routes ──────────────────────────────────────
+
+	huma.Register(api, huma.Operation{
+		OperationID: "get-task-board-kpi",
+		Method:      http.MethodGet,
+		Path:        "/task-board/kpi",
+		Summary:     "Task board KPI stats",
+		Description: "返回任务执行看板的聚合统计指标：总执行次数、成功率、平均耗时、活跃任务数。",
+		Tags:        []string{"TaskBoard"},
+	}, handlers.TaskBoardKPI)
+
+	huma.Register(api, huma.Operation{
+		OperationID: "list-task-board-executions",
+		Method:      http.MethodGet,
+		Path:        "/task-board/executions",
+		Summary:     "List task board executions",
+		Description: "分页返回任务执行历史记录，支持按状态筛选。",
+		Tags:        []string{"TaskBoard"},
+	}, handlers.TaskBoardListExecutions)
+
+	huma.Register(api, huma.Operation{
+		OperationID: "get-task-board-execution",
+		Method:      http.MethodGet,
+		Path:        "/task-board/executions/{id}",
+		Summary:     "Get task board execution detail",
+		Description: "返回单次执行详情，包含步骤列表和工具调用记录。",
+		Tags:        []string{"TaskBoard"},
+	}, handlers.TaskBoardGetExecution)
+
+	huma.Register(api, huma.Operation{
+		OperationID: "start-task-board-execution",
+		Method:      http.MethodPost,
+		Path:        "/task-board/execute",
+		Summary:     "Start task board execution",
+		Description: "创建新的任务执行记录。实际执行通过 SSE 流端点进行。",
+		Tags:        []string{"TaskBoard"},
+	}, handlers.TaskBoardStartExecution)
+
+	huma.Register(api, huma.Operation{
+		OperationID: "stop-task-board-execution",
+		Method:      http.MethodPost,
+		Path:        "/task-board/executions/{id}/stop",
+		Summary:     "Stop task board execution",
+		Description: "停止正在运行的任务执行。",
+		Tags:        []string{"TaskBoard"},
+	}, handlers.TaskBoardStopExecution)
+
+	huma.Register(api, huma.Operation{
+		OperationID: "evolve-task-board-execution",
+		Method:      http.MethodPost,
+		Path:        "/task-board/executions/{id}/evolve",
+		Summary:     "Trigger self-evolution iteration",
+		Description: "手动触发任务执行自我进化迭代，创建子执行记录。",
+		Tags:        []string{"TaskBoard"},
+	}, handlers.TaskBoardTriggerEvolution)
+
+	sse.Register(api, huma.Operation{
+		OperationID: "stream-task-board-execute",
+		Method:      http.MethodGet,
+		Path:        "/task-board/execute/stream",
+		Summary:     "Stream task board execution",
+		Description: "以 Server-Sent Events 执行任务并实时返回可视化流程：阶段切换、步骤状态、工具调用、AI 推理和自我进化复盘。",
+		Tags:        []string{"TaskBoard"},
+	}, taskBoardStreamEvents(), handlers.TaskBoardExecuteStream)
 }

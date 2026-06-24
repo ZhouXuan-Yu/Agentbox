@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AlertDialog, Button, Card, Chip, Modal, SearchField, Separator, Skeleton, toast } from '@heroui/react'
-import { CellSelect, CellSwitch, ItemCard, ItemCardGroup } from '@heroui-pro/react'
+import { CellSelect, CellSwitch, ItemCard, ItemCardGroup, PieChart, Segment } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type {
   OpenClawPluginDoctorResponse,
