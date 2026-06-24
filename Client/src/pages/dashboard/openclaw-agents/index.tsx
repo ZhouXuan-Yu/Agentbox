@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Avatar, Button, Card, Checkbox, Chip, Description, Dropdown, Input, Label, ListBox, Modal, SearchField, Separator, Skeleton, Switch, toast, AlertDialog } from '@heroui/react'
-import { InlineSelect, ItemCard, ItemCardGroup, PieChart, RadioButtonGroup, Segment } from '@heroui-pro/react'
+import { Avatar, Button, Card, Checkbox, Chip, Description, Dropdown, Input, Label, ListBox, Modal, SearchField, Separator, Skeleton, toast, AlertDialog } from '@heroui/react'
+import { CellSwitch, InlineSelect, ItemCard, ItemCardGroup, PieChart, RadioButtonGroup, Segment } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type {
   OpenClawAgentBinding,
@@ -1740,11 +1740,11 @@ function DefaultAgentItemCard({ value, isSaving, onChange }: { value: boolean; i
         <ItemCard.Description>开启后保存，会把当前智能体写为默认，并清理其它默认项。</ItemCard.Description>
       </ItemCard.Content>
       <ItemCard.Action>
-        <Switch size="lg" aria-label="设为默认Agent" isSelected={value} isDisabled={isSaving} onChange={onChange}>
-          <Switch.Control>
-            <Switch.Thumb />
-          </Switch.Control>
-        </Switch>
+        <CellSwitch size="lg" aria-label="设为默认Agent" isSelected={value} isDisabled={isSaving} onChange={onChange}>
+          <CellSwitch.Trigger>
+            <CellSwitch.Control />
+          </CellSwitch.Trigger>
+        </CellSwitch>
       </ItemCard.Action>
     </ItemCard>
   )
@@ -1834,11 +1834,11 @@ function AdvancedSettingsCards({
               <ItemCard.Action>
                 <div className="flex items-center gap-2">
                   <AdvancedInlineSelect ariaLabel="详细输出" value={value.verboseDefault} options={verboseOptions} isDisabled={isSaving} onChange={(nextValue) => onChange('verboseDefault', nextValue)} />
-                  <Switch aria-label="快速模式" isSelected={value.fastModeDefault} isDisabled={isSaving} onChange={(isSelected) => onChange('fastModeDefault', isSelected)}>
-                    <Switch.Control>
-                      <Switch.Thumb />
-                    </Switch.Control>
-                  </Switch>
+                  <CellSwitch aria-label="快速模式" isSelected={value.fastModeDefault} isDisabled={isSaving} onChange={(isSelected) => onChange('fastModeDefault', isSelected)}>
+                    <CellSwitch.Trigger>
+                      <CellSwitch.Control />
+                    </CellSwitch.Trigger>
+                  </CellSwitch>
                 </div>
               </ItemCard.Action>
             </ItemCard>

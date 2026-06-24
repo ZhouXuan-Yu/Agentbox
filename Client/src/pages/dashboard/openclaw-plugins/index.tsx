@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { AlertDialog, Button, Card, Chip, Modal, SearchField, Separator, Skeleton, Switch, toast } from '@heroui/react'
-import { ItemCard, ItemCardGroup, PieChart, Segment } from '@heroui-pro/react'
+import { AlertDialog, Button, Card, Chip, Modal, SearchField, Separator, Skeleton, toast } from '@heroui/react'
+import { CellSelect, CellSwitch, ItemCard, ItemCardGroup } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type {
   OpenClawPluginDoctorResponse,
@@ -595,11 +595,11 @@ function PluginCard({
                 {plugin.packageName ? <Chip size="sm" variant="soft">{plugin.packageName}</Chip> : null}
                 {pluginSource(plugin) ? <Chip size="sm" variant="soft">{pluginSource(plugin)}</Chip> : null}
               </div>
-              <Switch size="lg" isSelected={enabled} isDisabled={mutating || !id} onChange={() => onToggle(plugin)} aria-label="切换插件启用状态">
-                <Switch.Control>
-                  <Switch.Thumb />
-                </Switch.Control>
-              </Switch>
+              <CellSwitch size="lg" isSelected={enabled} isDisabled={mutating || !id} onChange={() => onToggle(plugin)} aria-label="切换插件启用状态">
+                <CellSwitch.Trigger>
+                  <CellSwitch.Control />
+                </CellSwitch.Trigger>
+              </CellSwitch>
             </div>
           </div>
 
@@ -649,11 +649,11 @@ function PluginSwitch({
         <ItemCard.Description>{description}</ItemCard.Description>
       </ItemCard.Content>
       <ItemCard.Action>
-        <Switch aria-label={title} isSelected={isSelected} onChange={onChange}>
-          <Switch.Control>
-            <Switch.Thumb />
-          </Switch.Control>
-        </Switch>
+        <CellSwitch aria-label={title} isSelected={isSelected} onChange={onChange}>
+          <CellSwitch.Trigger>
+            <CellSwitch.Control />
+          </CellSwitch.Trigger>
+        </CellSwitch>
       </ItemCard.Action>
     </ItemCard>
   )

@@ -1,8 +1,8 @@
 import type { ReactNode, RefObject } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Key } from '@heroui/react'
-import { AlertDialog, Alert, Button, Card, Chip, Dropdown, InputGroup, ListBox, Link, Modal, Separator, Skeleton, Switch, toast } from '@heroui/react'
-import { CellSelect, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
+import { AlertDialog, Alert, Button, Card, Chip, Dropdown, InputGroup, ListBox, Link, Modal, Separator, Skeleton, toast } from '@heroui/react'
+import { CellSelect, CellSwitch, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type {
   OpenClawAgentSummary,
@@ -614,17 +614,17 @@ export function OpenClawMatrixPanel() {
             },
             {
               action: (
-                <Switch
+                <CellSwitch
                   size="lg"
                   aria-label="切换 Matrix 渠道总开关"
                   isSelected={enabled}
                   isDisabled={!configured || isTaskRunning || isLoading || savingChannelEnabled}
                   onChange={(nextEnabled) => void updateChannelEnabled(nextEnabled)}
                 >
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch>
+                  <CellSwitch.Trigger>
+                    <CellSwitch.Control />
+                  </CellSwitch.Trigger>
+                </CellSwitch>
               ),
               description: enabled ? 'Matrix 渠道已启用' : 'Matrix 渠道已停用',
               icon: 'lucide:power',
@@ -824,9 +824,9 @@ function MatrixAccountCard({
               </Dropdown.Popover>
             </Dropdown>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
-            <Switch size="lg" aria-label="启用 Matrix 账号" isSelected={draft.enabled} isDisabled={isDisabled || isSaving} onChange={(enabled) => onChange({ enabled })}>
-              <Switch.Control><Switch.Thumb /></Switch.Control>
-            </Switch>
+            <CellSwitch size="lg" aria-label="启用 Matrix 账号" isSelected={draft.enabled} isDisabled={isDisabled || isSaving} onChange={(enabled) => onChange({ enabled })}>
+              <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+            </CellSwitch>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
             <Button isIconOnly size="sm" variant="tertiary" aria-label="删除 Matrix 账号" onPress={() => onDelete(account)} isDisabled={isDisabled || isSaving}>
               <Icon icon="lucide:trash-2" className="size-4" />
@@ -915,9 +915,9 @@ function MatrixAddAccountModal({
                       <FriendlySelect ariaLabel="DM 策略" isDisabled={isSubmitting} options={dmPolicyOptions} value={form.dmPolicy} onChange={(value) => update({ dmPolicy: String(value ?? 'pairing') })} />
                     </FormItem>
                     <FormItem actionClassName="w-fit" description="关闭后忽略所有私信。" icon="lucide:message-circle-off" title="DM 启用">
-                      <Switch size="lg" aria-label="DM 启用" isSelected={form.dmEnabled} isDisabled={isSubmitting} onChange={(dmEnabled) => update({ dmEnabled })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="DM 启用" isSelected={form.dmEnabled} isDisabled={isSubmitting} onChange={(dmEnabled) => update({ dmEnabled })}>
+                        <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                     <FormItem description="DM 会话按用户或按房间隔离。" icon="lucide:git-branch" title="DM 会话">
                       <FriendlySelect ariaLabel="DM 会话作用域" isDisabled={isSubmitting} options={sessionScopeOptions} value={form.dmSessionScope || 'inherit'} onChange={(value) => update({ dmSessionScope: String(value ?? 'inherit') })} />
@@ -957,14 +957,14 @@ function MatrixAddAccountModal({
                       <ItemCardGroup.Description>E2EE、私有 homeserver 和原生 exec 审批。</ItemCardGroup.Description>
                     </ItemCardGroup.Header>
                     <FormItem actionClassName="w-fit" description="为此账号启用 Matrix E2EE。" icon="lucide:lock-keyhole" title="E2EE">
-                      <Switch size="lg" aria-label="启用 E2EE" isSelected={form.encryption} isDisabled={isSubmitting} onChange={(encryption) => update({ encryption })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="启用 E2EE" isSelected={form.encryption} isDisabled={isSubmitting} onChange={(encryption) => update({ encryption })}>
+                        <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                     <FormItem actionClassName="w-fit" description="允许 localhost、LAN 或 Tailscale homeserver。" icon="lucide:network" title="私有网络">
-                      <Switch size="lg" aria-label="允许私有网络 homeserver" isSelected={form.allowPrivateNetwork} isDisabled={isSubmitting} onChange={(allowPrivateNetwork) => update({ allowPrivateNetwork })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="允许私有网络 homeserver" isSelected={form.allowPrivateNetwork} isDisabled={isSubmitting} onChange={(allowPrivateNetwork) => update({ allowPrivateNetwork })}>
+                        <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                     <FormItem description="审批提示开关。" icon="lucide:shield-alert" title="审批开关">
                       <FriendlySelect ariaLabel="Exec 审批开关" isDisabled={isSubmitting} options={booleanModeOptions} value={form.execApprovalsEnabled} onChange={(value) => update({ execApprovalsEnabled: String(value ?? 'inherit') })} />
@@ -1158,9 +1158,9 @@ function FormItem({
 function ActionSwitch({ disabled, label, onChange, value }: { disabled?: boolean; label: string; onChange: (value: boolean) => void; value: boolean }) {
   return (
     <FormItem actionClassName="w-fit" icon="lucide:toggle-right" title={label}>
-      <Switch size="lg" aria-label={label} isSelected={value} isDisabled={disabled} onChange={onChange}>
-        <Switch.Control><Switch.Thumb /></Switch.Control>
-      </Switch>
+      <CellSwitch size="lg" aria-label={label} isSelected={value} isDisabled={disabled} onChange={onChange}>
+        <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+      </CellSwitch>
     </FormItem>
   )
 }

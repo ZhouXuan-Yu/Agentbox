@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Card, Chip, Modal, SearchField, Skeleton, Switch, toast } from '@heroui/react'
-import { PieChart, Segment } from '@heroui-pro/react'
+import { Button, Card, Chip, Modal, SearchField, Skeleton, toast } from '@heroui/react'
+import { CellSelect, CellSwitch, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type {
   OpenClawShowcaseHotSkill,
@@ -617,17 +617,17 @@ function SkillCard({
             <Button isIconOnly size="sm" variant="ghost" onPress={() => onShowDetail(skill)}>
               <Icon icon={missing.length > 0 ? 'lucide:triangle-alert' : 'lucide:info'} />
             </Button>
-            <Switch
+            <CellSwitch
               aria-label={`${skill.disabled ? '启用' : '停用'} ${skill.name}`}
               isDisabled={mutating}
               isSelected={!skill.disabled}
               size="lg"
               onChange={() => onToggle(skill)}
             >
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
-            </Switch>
+              <CellSwitch.Trigger>
+                <CellSwitch.Control />
+              </CellSwitch.Trigger>
+            </CellSwitch>
           </div>
         </div>
         {skill.filePath ? <p className="truncate text-xs text-muted">{skill.filePath}</p> : null}

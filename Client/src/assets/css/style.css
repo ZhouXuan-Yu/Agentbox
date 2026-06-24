@@ -37,6 +37,12 @@
   --font-sans: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
 }
 
+/* Override Tailwind reset which sets button { border-radius: 0 } */
+/* Use --field-radius to match CellSwitch trigger styling */
+button {
+  border-radius: var(--field-radius);
+}
+
 .text-success-foreground {
   color: var(--success-foreground);
 }

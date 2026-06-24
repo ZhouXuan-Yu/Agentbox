@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReactNode, SVGProps } from 'react'
 import type { Selection } from '@heroui/react'
-import { Alert, AlertDialog, Button, Card, Chip, Dropdown, Input, Label, Modal, SearchField, Separator, Skeleton, Switch, toast } from '@heroui/react'
+import { Alert, AlertDialog, Button, Card, Chip, Dropdown, Input, Label, Modal, SearchField, Separator, Skeleton, toast } from '@heroui/react'
 import { ItemCard, ItemCardGroup, PieChart, Segment } from '@heroui-pro/react'
+import { CellSwitch } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type { HermesCronJob, HermesCronJobCreate, HermesCronJobPatch, HermesCronListResponse, HermesCronRunEntry, HermesCronRunsResponse, HermesCronStatusResponse, HermesModelsResponse, HermesPlatformInfo, HermesPlatformsResponse, HermesSkillInfo, HermesSkillsResponse } from '@/api'
 import { createHermesCronJob, deleteHermesCronJob, getHermesCronStatus, getHermesModels, getHermesPlatforms, getHermesSkills, listHermesCronJobs, listHermesCronRuns, runHermesCronJob, updateHermesCronJob } from '@/api'
@@ -642,11 +643,11 @@ function CronJobCard({ job, mutating, onClone, onDelete, onEdit, onRun, onToggle
             <Button isIconOnly size="sm" variant="danger" aria-label="删除" onPress={() => onDelete(job)}>
               <Icon icon="lucide:trash-2" />
             </Button>
-            <Switch aria-label="启停任务" isDisabled={mutating} isSelected={job.enabled ?? true} size="lg" onChange={() => onToggle(job)}>
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
-            </Switch>
+            <CellSwitch aria-label="启停任务" isDisabled={mutating} isSelected={job.enabled ?? true} size="lg" onChange={() => onToggle(job)}>
+              <CellSwitch.Trigger>
+                <CellSwitch.Control />
+              </CellSwitch.Trigger>
+            </CellSwitch>
           </div>
         </div>
       </Card.Content>
@@ -974,9 +975,11 @@ function ExecutionForm({
         </FormItem>
         <Separator />
         <FormItem actionClassName="w-fit"  icon="lucide:terminal-square" title="No Agent">
-          <Switch size="lg" aria-label="No Agent" isSelected={form.noAgent} isDisabled={isSubmitting} onChange={(noAgent) => update({ noAgent })}>
-            <Switch.Control><Switch.Thumb /></Switch.Control>
-          </Switch>
+          <CellSwitch size="lg" aria-label="No Agent" isSelected={form.noAgent} isDisabled={isSubmitting} onChange={(noAgent) => update({ noAgent })}>
+            <CellSwitch.Trigger>
+              <CellSwitch.Control />
+            </CellSwitch.Trigger>
+          </CellSwitch>
         </FormItem>
       </ItemCardGroup>
 

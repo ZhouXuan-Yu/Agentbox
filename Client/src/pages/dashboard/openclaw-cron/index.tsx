@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Dispatch, ReactNode, SetStateAction } from 'react'
 import type { Key, TimeValue } from '@heroui/react'
-import { AlertDialog, Button, Calendar, Card, Chip, DateField, DatePicker, Dropdown, Input, Label, ListBox, Modal, SearchField, Separator, Skeleton, Switch, TimeField, Tooltip, toast } from '@heroui/react'
-import { CellSelect, ItemCard, ItemCardGroup, Kanban, PieChart, Segment, useKanban, useKanbanColumn } from '@heroui-pro/react'
+import { AlertDialog, Button, Calendar, Card, Chip, DateField, DatePicker, Dropdown, Input, Label, ListBox, Modal, SearchField, Separator, Skeleton, TimeField, Tooltip, toast } from '@heroui/react'
+import { CellSelect, CellSwitch, ItemCard, ItemCardGroup, Kanban, PieChart, Segment, useKanban, useKanbanColumn } from '@heroui-pro/react'
 import type { UseKanbanReturn } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type { DateValue } from '@internationalized/date'
@@ -742,9 +742,11 @@ function CronCreateForm({
             </FormItem>
             <Separator />
             <FormItem actionClassName="w-fit" description="关闭后会先保存为草稿，稍后可手动启用。" icon="lucide:power" title="创建后启用">
-              <Switch size="lg" aria-label="创建后启用" isSelected={form.enabled} isDisabled={isSubmitting} onChange={(enabled) => update({ enabled })}>
-                <Switch.Control><Switch.Thumb /></Switch.Control>
-              </Switch>
+              <CellSwitch size="lg" aria-label="创建后启用" isSelected={form.enabled} isDisabled={isSubmitting} onChange={(enabled) => update({ enabled })}>
+                <CellSwitch.Trigger>
+                  <CellSwitch.Control />
+                </CellSwitch.Trigger>
+              </CellSwitch>
             </FormItem>
           </ItemCardGroup>
 
@@ -808,9 +810,11 @@ function CronCreateForm({
                 </FormItem>
                 <Separator />
                 <FormItem actionClassName="w-fit" description="开启后按表达式时间精确触发。" icon="lucide:crosshair" title="精确触发">
-                  <Switch size="lg" aria-label="精确触发" isSelected={form.exact} isDisabled={isSubmitting} onChange={(exact) => update({ exact })}>
-                    <Switch.Control><Switch.Thumb /></Switch.Control>
-                  </Switch>
+                  <CellSwitch size="lg" aria-label="精确触发" isSelected={form.exact} isDisabled={isSubmitting} onChange={(exact) => update({ exact })}>
+                    <CellSwitch.Trigger>
+                      <CellSwitch.Control />
+                    </CellSwitch.Trigger>
+                  </CellSwitch>
                 </FormItem>
               </>
             ) : null}
@@ -925,9 +929,11 @@ function CronCreateForm({
               </FormItem>
               <Separator />
               <FormItem actionClassName="w-fit" description="适合简单提醒或轻量简报。" icon="lucide:feather" title="轻量上下文">
-                <Switch size="lg" aria-label="轻量上下文" isSelected={form.lightContext} isDisabled={isSubmitting} onChange={(lightContext) => update({ lightContext })}>
-                  <Switch.Control><Switch.Thumb /></Switch.Control>
-                </Switch>
+                <CellSwitch size="lg" aria-label="轻量上下文" isSelected={form.lightContext} isDisabled={isSubmitting} onChange={(lightContext) => update({ lightContext })}>
+                  <CellSwitch.Trigger>
+                    <CellSwitch.Control />
+                  </CellSwitch.Trigger>
+                </CellSwitch>
               </FormItem>
             </ItemCardGroup>
           ) : null}
@@ -983,17 +989,21 @@ function CronCreateForm({
               ) : null}
               <Separator />
               <FormItem actionClassName="w-fit" description="开启后投递失败不会把任务运行标记为失败。" icon="lucide:badge-check" title="投递失败不算失败">
-                <Switch size="lg" aria-label="投递失败不算失败" isSelected={form.deliveryBestEffort} isDisabled={isSubmitting} onChange={(deliveryBestEffort) => update({ deliveryBestEffort })}>
-                  <Switch.Control><Switch.Thumb /></Switch.Control>
-                </Switch>
+                <CellSwitch size="lg" aria-label="投递失败不算失败" isSelected={form.deliveryBestEffort} isDisabled={isSubmitting} onChange={(deliveryBestEffort) => update({ deliveryBestEffort })}>
+                  <CellSwitch.Trigger>
+                    <CellSwitch.Control />
+                  </CellSwitch.Trigger>
+                </CellSwitch>
               </FormItem>
             </>
           ) : null}
           <Separator />
           <FormItem actionClassName="w-fit" description="仅一次性任务可用，成功运行后自动移除。" icon="lucide:trash-2" title="一次性成功后删除">
-            <Switch size="lg" aria-label="一次性成功后删除" isSelected={form.deleteAfterRun} isDisabled={isSubmitting || form.scheduleKind !== 'at'} onChange={(deleteAfterRun) => update({ deleteAfterRun })}>
-              <Switch.Control><Switch.Thumb /></Switch.Control>
-            </Switch>
+            <CellSwitch size="lg" aria-label="一次性成功后删除" isSelected={form.deleteAfterRun} isDisabled={isSubmitting || form.scheduleKind !== 'at'} onChange={(deleteAfterRun) => update({ deleteAfterRun })}>
+              <CellSwitch.Trigger>
+                <CellSwitch.Control />
+              </CellSwitch.Trigger>
+            </CellSwitch>
           </FormItem>
         </ItemCardGroup>
       ) : null}
@@ -1422,9 +1432,11 @@ function CronKanbanCard({
         </div>
       </div>
       <div className="flex items-center justify-between gap-2 pt-1">
-        <Switch size="lg" aria-label="切换任务启用状态" isSelected={enabled} isDisabled={isMutating} onChange={onToggle}>
-          <Switch.Control><Switch.Thumb /></Switch.Control>
-        </Switch>
+        <CellSwitch size="lg" aria-label="切换任务启用状态" isSelected={enabled} isDisabled={isMutating} onChange={onToggle}>
+          <CellSwitch.Trigger>
+            <CellSwitch.Control />
+          </CellSwitch.Trigger>
+        </CellSwitch>
         <div className="flex items-center gap-1">
           <Tooltip delay={300}>
             <Button isIconOnly aria-label="编辑任务" size="sm" variant="ghost" isDisabled={isMutating} onPress={onEdit}>

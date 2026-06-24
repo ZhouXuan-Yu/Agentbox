@@ -1,6 +1,6 @@
 import { type SVGProps, useCallback, useEffect, useMemo, useState } from 'react'
-import { AlertDialog, Button, Card, Chip, Modal, SearchField, Separator, Skeleton, Switch, Tooltip, toast } from '@heroui/react'
-import { ItemCard, ItemCardGroup, PieChart, Segment } from '@heroui-pro/react'
+import { AlertDialog, Button, Card, Chip, Modal, SearchField, Separator, Skeleton, Tooltip, toast } from '@heroui/react'
+import { CellSwitch, ItemCard, ItemCardGroup, PieChart, Segment } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type {
   HermesPluginDetailResponse,
@@ -538,11 +538,11 @@ function PluginCard({
               {plugin.dashboard ? <Chip size="sm" variant="soft">Dashboard</Chip> : null}
               {plugin.error ? <Chip size="sm" variant="soft" color="warning">Error</Chip> : null}
             </div>
-            <Switch size="lg" isSelected={plugin.explicitlyEnabled || plugin.enabled} isDisabled={mutating || !canTogglePlugin(plugin)} onChange={() => onToggle(plugin)} aria-label="切换插件启用状态">
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
-            </Switch>
+            <CellSwitch size="lg" isSelected={plugin.explicitlyEnabled || plugin.enabled} isDisabled={mutating || !canTogglePlugin(plugin)} onChange={() => onToggle(plugin)} aria-label="切换插件启用状态">
+              <CellSwitch.Trigger>
+                <CellSwitch.Control />
+              </CellSwitch.Trigger>
+            </CellSwitch>
           </div>
 
           <h3 className="truncate text-base font-semibold text-foreground">{pluginName(plugin)}</h3>
@@ -683,11 +683,11 @@ function PluginSwitch({
         <ItemCard.Description>{description}</ItemCard.Description>
       </ItemCard.Content>
       <ItemCard.Action>
-        <Switch aria-label={title} isSelected={isSelected} onChange={onChange}>
-          <Switch.Control>
-            <Switch.Thumb />
-          </Switch.Control>
-        </Switch>
+        <CellSwitch aria-label={title} isSelected={isSelected} onChange={onChange}>
+          <CellSwitch.Trigger>
+            <CellSwitch.Control />
+          </CellSwitch.Trigger>
+        </CellSwitch>
       </ItemCard.Action>
     </ItemCard>
   )

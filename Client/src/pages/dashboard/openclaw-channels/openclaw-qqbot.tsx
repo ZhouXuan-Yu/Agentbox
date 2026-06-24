@@ -1,8 +1,8 @@
 import type { ReactNode, RefObject } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Key } from '@heroui/react'
-import { AlertDialog, Alert, Button, Card, Chip, Dropdown, InputGroup, Link, ListBox, Modal, Separator, Skeleton, Switch, toast } from '@heroui/react'
-import { CellSelect, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
+import { AlertDialog, Alert, Button, Card, Chip, Dropdown, InputGroup, Link, ListBox, Modal, Separator, Skeleton, toast } from '@heroui/react'
+import { CellSelect, CellSwitch, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type {
   OpenClawAgentSummary,
@@ -563,17 +563,17 @@ export function OpenClawQQBotPanel() {
             },
             {
               action: (
-                <Switch
+                <CellSwitch
                   size="lg"
                   aria-label="切换 QQBot 渠道总开关"
                   isSelected={enabled}
                   isDisabled={!configured || isTaskRunning || isLoading || savingChannelEnabled}
                   onChange={(nextEnabled) => void updateChannelEnabled(nextEnabled)}
                 >
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch>
+                  <CellSwitch.Trigger>
+                    <CellSwitch.Control />
+                  </CellSwitch.Trigger>
+                </CellSwitch>
               ),
               description: enabled ? 'QQBot 渠道已启用' : 'QQBot 渠道已停用',
               icon: 'lucide:power',
@@ -779,11 +779,11 @@ function QQBotAccountCard({
               </Dropdown.Popover>
             </Dropdown>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
-            <Switch size="lg" className="flex p-1 bg-default rounded-full" aria-label="启用 QQBot 账号" isSelected={draft.enabled} isDisabled={isDisabled || isSaving} onChange={(enabled) => onChange({ enabled })}>
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
-            </Switch>
+            <CellSwitch size="lg" className="flex p-1 bg-default rounded-full" aria-label="启用 QQBot 账号" isSelected={draft.enabled} isDisabled={isDisabled || isSaving} onChange={(enabled) => onChange({ enabled })}>
+              <CellSwitch.Trigger>
+                <CellSwitch.Control />
+              </CellSwitch.Trigger>
+            </CellSwitch>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
             <Button isIconOnly size="sm" variant="tertiary" aria-label="编辑 QQBot 账号" onPress={() => onEdit(account)} isDisabled={isDisabled || isSaving}>
               <Icon icon="lucide:pencil" className="size-4" />
@@ -1029,21 +1029,21 @@ function DeliveryExperienceGroup({
         <ItemCardGroup.Description>控制 Markdown、URL 直传和多段回复合并。</ItemCardGroup.Description>
       </ItemCardGroup.Header>
       <FormItem actionClassName="w-fit" description="启用 QQ Markdown 能力。" icon="lucide:file-type-2" title="Markdown">
-        <Switch size="lg" aria-label="启用 QQ Markdown" isSelected={form.markdownSupport} isDisabled={isSubmitting} onChange={(markdownSupport) => onChange({ markdownSupport })}>
-          <Switch.Control><Switch.Thumb /></Switch.Control>
-        </Switch>
+        <CellSwitch size="lg" aria-label="启用 QQ Markdown" isSelected={form.markdownSupport} isDisabled={isSubmitting} onChange={(markdownSupport) => onChange({ markdownSupport })}>
+          <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+        </CellSwitch>
       </FormItem>
       <Separator />
       <FormItem actionClassName="w-fit" description="公网媒体 URL 优先交给 QQ 平台拉取。" icon="lucide:upload-cloud" title="URL 直传">
-        <Switch size="lg" aria-label="启用 URL 直传" isSelected={form.urlDirectUpload} isDisabled={isSubmitting} onChange={(urlDirectUpload) => onChange({ urlDirectUpload })}>
-          <Switch.Control><Switch.Thumb /></Switch.Control>
-        </Switch>
+        <CellSwitch size="lg" aria-label="启用 URL 直传" isSelected={form.urlDirectUpload} isDisabled={isSubmitting} onChange={(urlDirectUpload) => onChange({ urlDirectUpload })}>
+          <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+        </CellSwitch>
       </FormItem>
       <Separator />
       <FormItem actionClassName="w-fit" description="短时间内多次 deliver 合并成一条消息。" icon="lucide:merge" title="合并回复">
-        <Switch size="lg" aria-label="启用合并回复" isSelected={form.deliverDebounceEnabled} isDisabled={isSubmitting} onChange={(deliverDebounceEnabled) => onChange({ deliverDebounceEnabled })}>
-          <Switch.Control><Switch.Thumb /></Switch.Control>
-        </Switch>
+        <CellSwitch size="lg" aria-label="启用合并回复" isSelected={form.deliverDebounceEnabled} isDisabled={isSubmitting} onChange={(deliverDebounceEnabled) => onChange({ deliverDebounceEnabled })}>
+          <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+        </CellSwitch>
       </FormItem>
       <Separator />
       <FormItem description="合并窗口，单位毫秒。" icon="lucide:timer" title="窗口时间">
@@ -1107,9 +1107,9 @@ function StreamingApprovalsGroup({
         <ItemCardGroup.Description>控制 QQ 侧流式预览和 Exec 审批投递。</ItemCardGroup.Description>
       </ItemCardGroup.Header>
       <FormItem actionClassName="w-fit" description="启用后私聊可使用 QQ 流式消息能力。" icon="lucide:radio-tower" title="流式回复">
-        <Switch size="lg" aria-label="启用 QQBot 流式回复" isSelected={form.streamingEnabled} isDisabled={isSubmitting} onChange={(streamingEnabled) => onChange({ streamingEnabled, streamingMode: streamingEnabled ? 'partial' : 'off' })}>
-          <Switch.Control><Switch.Thumb /></Switch.Control>
-        </Switch>
+        <CellSwitch size="lg" aria-label="启用 QQBot 流式回复" isSelected={form.streamingEnabled} isDisabled={isSubmitting} onChange={(streamingEnabled) => onChange({ streamingEnabled, streamingMode: streamingEnabled ? 'partial' : 'off' })}>
+          <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+        </CellSwitch>
       </FormItem>
       <Separator />
       <FormItem description="流式回复模式。" icon="lucide:activity" title="流式模式">
@@ -1117,9 +1117,9 @@ function StreamingApprovalsGroup({
       </FormItem>
       <Separator />
       <FormItem actionClassName="w-fit" description="兼容旧版 C2C streaming API。" icon="lucide:route" title="C2C Stream API">
-        <Switch size="lg" aria-label="启用 C2C Stream API" isSelected={form.streamingC2CStreamApi} isDisabled={isSubmitting} onChange={(streamingC2CStreamApi) => onChange({ streamingC2CStreamApi })}>
-          <Switch.Control><Switch.Thumb /></Switch.Control>
-        </Switch>
+        <CellSwitch size="lg" aria-label="启用 C2C Stream API" isSelected={form.streamingC2CStreamApi} isDisabled={isSubmitting} onChange={(streamingC2CStreamApi) => onChange({ streamingC2CStreamApi })}>
+          <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+        </CellSwitch>
       </FormItem>
       <Separator />
       <FormItem description="Exec 审批是否由 QQBot 原生承接。" icon="lucide:shield-check" title="审批状态">
@@ -1189,9 +1189,9 @@ function SpeechGroup({
         <ItemCardGroup.Description>配置 provider、model 和启用状态；provider 引用 models.providers。</ItemCardGroup.Description>
       </ItemCardGroup.Header>
       <FormItem actionClassName="w-fit" description="启用该语音能力。" icon="lucide:toggle-right" title="启用">
-        <Switch size="lg" aria-label={`${title} 启用`} isSelected={enabled} onChange={(nextEnabled) => onChange({ enabled: nextEnabled })}>
-          <Switch.Control><Switch.Thumb /></Switch.Control>
-        </Switch>
+        <CellSwitch size="lg" aria-label={`${title} 启用`} isSelected={enabled} onChange={(nextEnabled) => onChange({ enabled: nextEnabled })}>
+          <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+        </CellSwitch>
       </FormItem>
       <FormItem description="models.providers 中的 provider key。" icon="lucide:plug" title="Provider">
         <ClearableInput value={provider} placeholder="openai" onChange={(nextProvider) => onChange({ provider: nextProvider })} />

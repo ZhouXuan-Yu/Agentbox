@@ -14,7 +14,7 @@
     "clean:tauri-cache": "node scripts/clean-tauri-cache.mjs"
   },
   "dependencies": {
-    "@heroui-pro/react": "^1.0.0-beta.4",
+    "@heroui-pro/react": "workspace:*",
     "@heroui/react": "^3.0.5",
     "@heroui/styles": "^3.0.5",
     "@hookform/resolvers": "^5.2.2",
@@ -84,12 +84,5 @@
     "unplugin-vue-router": "^0.19.2",
     "vite": "^8.0.13",
     "vite-plugin-pages": "^0.33.3"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "heroui-pro",
-      "@heroui-pro/react",
-      "heroui-native-pro"
-    ]
   }
 }

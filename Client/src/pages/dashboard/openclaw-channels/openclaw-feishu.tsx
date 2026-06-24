@@ -2,8 +2,8 @@ import type { ReactNode, RefObject } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as QRCode from 'qrcode'
 import type { Key } from '@heroui/react'
-import { Alert, AlertDialog, Button, Card, Chip, Dropdown, InputGroup, Modal, Skeleton, Switch, toast } from '@heroui/react'
-import { ItemCard, ItemCardGroup } from '@heroui-pro/react'
+import { Alert, AlertDialog, Button, Card, Chip, Dropdown, InputGroup, Modal, Skeleton, toast } from '@heroui/react'
+import { CellSwitch, ItemCard, ItemCardGroup } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type {
   OpenClawAgentSummary,
@@ -536,17 +536,17 @@ export function OpenClawFeishuPanel() {
             },
             {
               action: installed && !isTaskRunning && !isLoading ? (
-                <Switch
+                <CellSwitch
                   size="lg"
                   aria-label="切换飞书渠道总开关"
                   isSelected={enabled}
                   isDisabled={savingChannel === 'enabled'}
                   onChange={(value) => void updateChannelFlag('enabled', value)}
                 >
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch>
+                  <CellSwitch.Trigger>
+                    <CellSwitch.Control />
+                  </CellSwitch.Trigger>
+                </CellSwitch>
               ) : null,
               description: enabled ? '飞书渠道已启用' : '飞书渠道已停用',
               icon: 'lucide:power',
@@ -556,17 +556,17 @@ export function OpenClawFeishuPanel() {
             },
             {
               action: installed && !isTaskRunning && !isLoading ? (
-                <Switch
+                <CellSwitch
                   size="lg"
                   aria-label="切换飞书话题独立上下文"
                   isSelected={Boolean(status?.config.threadSession)}
                   isDisabled={savingChannel === 'threadSession'}
                   onChange={(value) => void updateChannelFlag('threadSession', value)}
                 >
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch>
+                  <CellSwitch.Trigger>
+                    <CellSwitch.Control />
+                  </CellSwitch.Trigger>
+                </CellSwitch>
               ) : null,
               description: status?.config.threadSession ? '每个话题独立上下文' : '使用默认会话上下文',
               icon: 'lucide:messages-square',
@@ -786,17 +786,17 @@ function FeishuAccountCard({
                 </Dropdown.Popover>
               </Dropdown>
               <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
-              <Switch
+              <CellSwitch
                 className="flex p-1 bg-default rounded-full"
                 size="lg"
                 aria-label="启用飞书账号"
                 isSelected={draft.enabled}
                 onChange={(enabled) => onChange({ enabled })}
               >
-                <Switch.Control>
-                  <Switch.Thumb />
-                </Switch.Control>
-              </Switch>
+                <CellSwitch.Trigger>
+                  <CellSwitch.Control />
+                </CellSwitch.Trigger>
+              </CellSwitch>
               <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
               <Button isIconOnly size="sm" variant="tertiary" aria-label="编辑飞书机器人" onPress={() => onEdit(account)}>
                 <Icon icon="lucide:pencil" className="size-4" />
@@ -893,11 +893,11 @@ function FeishuAccountModal({
                   <FriendlySelect ariaLabel="群聊策略" isDisabled={isSubmitting} options={groupPolicyOptions} value={form.groupPolicy} onChange={(value) => update({ groupPolicy: String(value ?? 'allowlist') })} />
                 </FormItem>
                 <FormItem actionClassName="w-fit" description="群消息需要 @ 机器人后才触发。" icon="lucide:at-sign" title="群聊需 @">
-                  <Switch size="lg" aria-label="群聊要求提及机器人" isSelected={form.requireMention} isDisabled={isSubmitting} onChange={(requireMention) => update({ requireMention })}>
-                    <Switch.Control>
-                      <Switch.Thumb />
-                    </Switch.Control>
-                  </Switch>
+                  <CellSwitch size="lg" aria-label="群聊要求提及机器人" isSelected={form.requireMention} isDisabled={isSubmitting} onChange={(requireMention) => update({ requireMention })}>
+                    <CellSwitch.Trigger>
+                      <CellSwitch.Control />
+                    </CellSwitch.Trigger>
+                  </CellSwitch>
                 </FormItem>
               </ItemCardGroup>
             </div>
@@ -972,11 +972,11 @@ function FeishuAccountEditModal({
                     <ClearableInput value={form.name} disabled={isSubmitting} placeholder={account?.accountId || '飞书机器人'} onChange={(name) => update({ name })} />
                   </FormItem>
                   <FormItem actionClassName="w-fit" description="控制该机器人是否参与消息处理。" icon="lucide:power" title="启用">
-                    <Switch size="lg" aria-label="启用飞书机器人" isSelected={form.enabled} isDisabled={isSubmitting} onChange={(enabled) => update({ enabled })}>
-                      <Switch.Control>
-                        <Switch.Thumb />
-                      </Switch.Control>
-                    </Switch>
+                    <CellSwitch size="lg" aria-label="启用飞书机器人" isSelected={form.enabled} isDisabled={isSubmitting} onChange={(enabled) => update({ enabled })}>
+                      <CellSwitch.Trigger>
+                        <CellSwitch.Control />
+                      </CellSwitch.Trigger>
+                    </CellSwitch>
                   </FormItem>
                   <FormItem description="默认绑定给哪个智能体。" icon="lucide:bot" title="智能体">
                     <FriendlySelect
@@ -1026,11 +1026,11 @@ function FeishuAccountEditModal({
                     <ClearableInput value={form.groupAllowFromText} disabled={isSubmitting} placeholder="ou_xxx, ou_yyy" onChange={(groupAllowFromText) => update({ groupAllowFromText })} />
                   </FormItem>
                   <FormItem actionClassName="w-fit" description="群消息需要 @ 机器人后才触发。" icon="lucide:at-sign" title="群聊需 @">
-                    <Switch size="lg" aria-label="群聊要求提及机器人" isSelected={form.requireMention} isDisabled={isSubmitting} onChange={(requireMention) => update({ requireMention })}>
-                      <Switch.Control>
-                        <Switch.Thumb />
-                      </Switch.Control>
-                    </Switch>
+                    <CellSwitch size="lg" aria-label="群聊要求提及机器人" isSelected={form.requireMention} isDisabled={isSubmitting} onChange={(requireMention) => update({ requireMention })}>
+                      <CellSwitch.Trigger>
+                        <CellSwitch.Control />
+                      </CellSwitch.Trigger>
+                    </CellSwitch>
                   </FormItem>
                 </ItemCardGroup>
               </div>

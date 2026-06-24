@@ -2,8 +2,8 @@ import * as QRCode from 'qrcode'
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { Key, Selection } from '@heroui/react'
-import { Button, Card, Chip, Dropdown, Input, Label, ListBox, Modal, SearchField, Separator, Skeleton, Switch, Tooltip, toast } from '@heroui/react'
-import { CellSelect, ItemCard, ItemCardGroup, PieChart, RadioButtonGroup, Segment, Stepper } from '@heroui-pro/react'
+import { Button, Card, Chip, Dropdown, Input, Label, ListBox, Modal, SearchField, Separator, Skeleton, Tooltip, toast } from '@heroui/react'
+import { CellSelect, CellSwitch, ItemCard, ItemCardGroup, PieChart, RadioButtonGroup, Segment, Stepper } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type {
   CCConnectModelProviderConfig,
@@ -1337,11 +1337,11 @@ function ProjectEditor({
               <Fragment key={item.key}>
                 <Separator />
                 <ProjectFormItem actionClassName="w-fit" description={item.description} icon={projectSwitchIcon(item.key)} title={item.label}>
-                  <Switch size="lg" aria-label={item.label} isSelected={Boolean(project[item.key])} isDisabled={isSaving} onChange={(isSelected) => onChange({ [item.key]: isSelected })}>
-                    <Switch.Control>
-                      <Switch.Thumb />
-                    </Switch.Control>
-                  </Switch>
+                  <CellSwitch size="lg" aria-label={item.label} isSelected={Boolean(project[item.key])} isDisabled={isSaving} onChange={(isSelected) => onChange({ [item.key]: isSelected })}>
+                    <CellSwitch.Trigger>
+                      <CellSwitch.Control />
+                    </CellSwitch.Trigger>
+                  </CellSwitch>
                 </ProjectFormItem>
               </Fragment>
             ))}

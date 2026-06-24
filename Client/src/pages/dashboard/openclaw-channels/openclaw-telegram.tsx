@@ -1,8 +1,8 @@
 import type { ReactNode, RefObject } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Key } from '@heroui/react'
-import { AlertDialog, Alert, Button, Card, Chip, Dropdown, InputGroup, ListBox, Link, Modal, Separator, Skeleton, Switch, toast } from '@heroui/react'
-import { CellSelect, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
+import { AlertDialog, Alert, Button, Card, Chip, Dropdown, InputGroup, ListBox, Link, Modal, Separator, Skeleton, toast } from '@heroui/react'
+import { CellSelect, CellSwitch, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type {
   OpenClawAgentSummary,
@@ -622,17 +622,16 @@ export function OpenClawTelegramPanel() {
             },
             {
               action: (
-                <Switch
+                <CellSwitch
                   size="lg"
                   aria-label="切换 Telegram 渠道总开关"
                   isSelected={enabled}
                   isDisabled={!configured || isTaskRunning || isLoading || savingChannelEnabled}
                   onChange={(nextEnabled) => void updateChannelEnabled(nextEnabled)}
                 >
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch>
+                  <CellSwitch.Trigger>
+                  </CellSwitch.Trigger>
+                </CellSwitch>
               ),
               description: enabled ? 'Telegram 渠道已启用' : 'Telegram 渠道已停用',
               icon: 'lucide:power',
@@ -831,7 +830,7 @@ function TelegramAccountCard({
               </Dropdown.Popover>
             </Dropdown>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
-            <Switch
+            <CellSwitch
               size="lg"
               className="flex p-1 bg-default rounded-full"
               aria-label="启用 Telegram 账号"
@@ -839,10 +838,9 @@ function TelegramAccountCard({
               isDisabled={isDisabled || isSaving}
               onChange={(enabled) => onChange({ enabled })}
             >
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
-            </Switch>
+              <CellSwitch.Trigger>
+              </CellSwitch.Trigger>
+            </CellSwitch>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
             <Button isIconOnly size="sm" variant="tertiary" aria-label="编辑 Telegram 账号" onPress={() => onEdit(account)} isDisabled={isDisabled || isSaving}>
               <Icon icon="lucide:pencil" className="size-4" />
@@ -979,9 +977,9 @@ function TelegramAddAccountModal({
                       />
                     </FormItem>
                     <FormItem actionClassName="w-fit" description="开启后群聊消息需要提及机器人后才触发。" icon="lucide:at-sign" title="群聊需 @">
-                      <Switch size="lg" aria-label="群聊要求提及机器人" isSelected={form.requireMention} isDisabled={isSubmitting} onChange={(requireMention) => update({ requireMention })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="群聊要求提及机器人" isSelected={form.requireMention} isDisabled={isSubmitting} onChange={(requireMention) => update({ requireMention })}>
+                        <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                   </ItemCardGroup>
 
@@ -1045,9 +1043,9 @@ function TelegramAddAccountModal({
                       />
                     </FormItem>
                     <FormItem actionClassName="w-fit" description="回答预览里是否显示工具进度。" icon="lucide:activity" title="预览工具进度">
-                      <Switch size="lg" aria-label="预览工具进度" isSelected={form.streamingPreviewToolProgress} isDisabled={isSubmitting} onChange={(streamingPreviewToolProgress) => update({ streamingPreviewToolProgress })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="预览工具进度" isSelected={form.streamingPreviewToolProgress} isDisabled={isSubmitting} onChange={(streamingPreviewToolProgress) => update({ streamingPreviewToolProgress })}>
+                        <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                     <FormItem description="工具进度里的命令详情显示策略。" icon="lucide:terminal" title="预览命令文本">
                       <FriendlySelect
@@ -1059,9 +1057,9 @@ function TelegramAddAccountModal({
                       />
                     </FormItem>
                     <FormItem actionClassName="w-fit" description="progress 模式是否保留工具进度。" icon="lucide:list-checks" title="进度工具状态">
-                      <Switch size="lg" aria-label="进度模式工具状态" isSelected={form.streamingProgressToolProgress} isDisabled={isSubmitting} onChange={(streamingProgressToolProgress) => update({ streamingProgressToolProgress })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="进度模式工具状态" isSelected={form.streamingProgressToolProgress} isDisabled={isSubmitting} onChange={(streamingProgressToolProgress) => update({ streamingProgressToolProgress })}>
+                        <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                     <FormItem description="progress 模式中的命令文本策略。" icon="lucide:terminal-square" title="进度命令文本">
                       <FriendlySelect
@@ -1073,9 +1071,9 @@ function TelegramAddAccountModal({
                       />
                     </FormItem>
                     <FormItem actionClassName="w-fit" description="兼容旧 blockStreaming 配置。" icon="lucide:blocks" title="Block Streaming">
-                      <Switch size="lg" aria-label="Block Streaming" isSelected={form.streamingBlock} isDisabled={isSubmitting} onChange={(streamingBlock) => update({ streamingBlock })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="Block Streaming" isSelected={form.streamingBlock} isDisabled={isSubmitting} onChange={(streamingBlock) => update({ streamingBlock })}>
+                        <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                   </ItemCardGroup>
 
@@ -1207,9 +1205,9 @@ function TelegramAddAccountModal({
                         />
                       </FormItem>
                       <FormItem actionClassName="w-fit" description="开启后群聊消息需要提及机器人后才触发。" icon="lucide:at-sign" title="群聊需 @">
-                        <Switch size="lg" aria-label="群聊要求提及机器人" isSelected={form.requireMention} isDisabled={isSubmitting} onChange={(requireMention) => update({ requireMention })}>
-                          <Switch.Control><Switch.Thumb /></Switch.Control>
-                        </Switch>
+                        <CellSwitch size="lg" aria-label="群聊要求提及机器人" isSelected={form.requireMention} isDisabled={isSubmitting} onChange={(requireMention) => update({ requireMention })}>
+                          <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+                        </CellSwitch>
                       </FormItem>
                     </ItemCardGroup>
                   ) : null}
@@ -1351,9 +1349,9 @@ function FormItem({
 function ActionSwitch({ disabled, label, onChange, value }: { disabled?: boolean; label: string; onChange: (value: boolean) => void; value: boolean }) {
   return (
     <FormItem actionClassName="w-fit" icon="lucide:toggle-right" title={label}>
-      <Switch size="lg" aria-label={label} isSelected={value} isDisabled={disabled} onChange={onChange}>
-        <Switch.Control><Switch.Thumb /></Switch.Control>
-      </Switch>
+      <CellSwitch size="lg" aria-label={label} isSelected={value} isDisabled={disabled} onChange={onChange}>
+        <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+      </CellSwitch>
     </FormItem>
   )
 }

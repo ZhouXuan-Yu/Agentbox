@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Key } from '@heroui/react'
-import { AlertDialog, Button, Card, Chip, Description, Dropdown, InputGroup, Label, ListBox, SearchField, Skeleton, Switch, TextField, Tooltip, toast } from '@heroui/react'
-import { CellSelect, ItemCard, ItemCardGroup } from '@heroui-pro/react'
+import { AlertDialog, Button, Card, Chip, Description, Dropdown, InputGroup, Label, ListBox, SearchField, Skeleton, TextField, Tooltip, toast } from '@heroui/react'
+import { CellSelect, CellSwitch, ItemCard, ItemCardGroup } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type { CCConnectModelProviderConfig, CCConnectModelsConfig, CCConnectModelsConfigResponse, CCConnectProviderModelConfig } from '@/api'
 import { fetchCCConnectProviderModels, getCCConnectModelsConfig, testCCConnectProviderModel, updateCCConnectModelsConfig } from '@/api'
@@ -1660,11 +1660,11 @@ function ModelAddDialog({
                   <div className="text-sm font-medium text-foreground">推理模型</div>
                   <div className="mt-1 text-xs text-muted">推理模型会使用特殊的调用方式。</div>
                 </div>
-                <Switch size="lg" aria-label="推理模型" isSelected={form.reasoning} onChange={(isSelected) => onChange((current) => ({ ...current, reasoning: isSelected }))}>
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch>
+                <CellSwitch size="lg" aria-label="推理模型" isSelected={form.reasoning} onChange={(isSelected) => onChange((current) => ({ ...current, reasoning: isSelected }))}>
+                  <CellSwitch.Trigger>
+                    <CellSwitch.Control />
+                  </CellSwitch.Trigger>
+                </CellSwitch>
               </div>
             </div>
           </AlertDialog.Body>

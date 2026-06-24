@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject, type SVGProps } from 'react'
 import * as QRCode from 'qrcode'
-import { Button, Card, Chip, Input, Label, ListBox, Modal, Skeleton, Switch, TextArea, TextField, Tooltip, toast } from '@heroui/react'
-import { CellSelect, ItemCard, ItemCardGroup, PieChart, RadioButtonGroup } from '@heroui-pro/react'
+import { Button, Card, Chip, Input, Label, ListBox, Modal, Skeleton, TextArea, TextField, Tooltip, toast } from '@heroui/react'
+import { CellSelect, CellSwitch, ItemCard, ItemCardGroup, PieChart, RadioButtonGroup } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type { HermesPlatformInfo, HermesPlatformsResponse, HermesTaskResponse, HermesTaskStreamError, HermesTaskStreamLog, HermesTaskStreamMeta, HermesTaskStreamStatus } from '@/api'
 import { getHermesPlatformQRSetupStreamURL, getHermesPlatforms, updateHermesPlatform } from '@/api'
@@ -683,11 +683,11 @@ function SwitchRow({ checked, description, icon, title, onChange }: { checked: b
         <ItemCard.Description>{description}</ItemCard.Description>
       </ItemCard.Content>
       <ItemCard.Action>
-        <Switch aria-label={title} isSelected={checked} onChange={onChange}>
-          <Switch.Control>
-            <Switch.Thumb />
-          </Switch.Control>
-        </Switch>
+        <CellSwitch aria-label={title} isSelected={checked} onChange={onChange}>
+          <CellSwitch.Trigger>
+            <CellSwitch.Control />
+          </CellSwitch.Trigger>
+        </CellSwitch>
       </ItemCard.Action>
     </ItemCard>
   )

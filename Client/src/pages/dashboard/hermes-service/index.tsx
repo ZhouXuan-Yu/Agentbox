@@ -1,7 +1,8 @@
 import { type SVGProps, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { RefObject } from 'react'
 import type { Key } from '@heroui/react'
-import { Alert, AlertDialog, Button, Card, Chip, Input, ListBox, Modal, Skeleton, Spinner, Switch, Tabs, Tooltip, toast } from '@heroui/react'
+import { Alert, AlertDialog, Button, Card, Chip, Input, ListBox, Modal, Skeleton, Spinner, Tabs, Tooltip, toast } from '@heroui/react'
+import { CellSwitch } from '@heroui-pro/react'
 import { CellSelect, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
 import Editor from '@monaco-editor/react'
 import { Icon } from '@iconify/react'
@@ -1845,11 +1846,11 @@ function ConfigFieldControl({ config, disabled, field, onChange }: { config: Rec
 
   if (field.type === 'toggle') {
     return (
-      <Switch size="lg" aria-label={field.label} isSelected={value === true} isDisabled={disabled} onChange={(isSelected) => onChange(field.path, isSelected)}>
-        <Switch.Control>
-          <Switch.Thumb />
-        </Switch.Control>
-      </Switch>
+      <CellSwitch size="lg" aria-label={field.label} isSelected={value === true} isDisabled={disabled} onChange={(isSelected) => onChange(field.path, isSelected)}>
+        <CellSwitch.Trigger>
+          <CellSwitch.Control />
+        </CellSwitch.Trigger>
+      </CellSwitch>
     )
   }
 

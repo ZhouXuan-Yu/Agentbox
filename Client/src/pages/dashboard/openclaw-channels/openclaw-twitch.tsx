@@ -1,8 +1,8 @@
 import type { ReactNode, RefObject } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Key } from '@heroui/react'
-import { AlertDialog, Alert, Button, Card, Chip, Dropdown, InputGroup, ListBox, Link, Modal, Separator, Skeleton, Switch, toast } from '@heroui/react'
-import { CellSelect, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
+import { AlertDialog, Alert, Button, Card, Chip, Dropdown, InputGroup, ListBox, Link, Modal, Separator, Skeleton, toast } from '@heroui/react'
+import { CellSelect, CellSwitch, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type {
   OpenClawAgentSummary,
@@ -479,15 +479,17 @@ export function OpenClawTwitchPanel() {
             },
             {
               action: (
-                <Switch
+                <CellSwitch
                   size="lg"
                   aria-label="切换 Twitch 渠道总开关"
                   isSelected={enabled}
                   isDisabled={!configured || isTaskRunning || isLoading || savingChannelEnabled}
                   onChange={(nextEnabled) => void updateChannelEnabled(nextEnabled)}
                 >
-                  <Switch.Control><Switch.Thumb /></Switch.Control>
-                </Switch>
+                  <CellSwitch.Trigger>
+                    <CellSwitch.Control />
+                  </CellSwitch.Trigger>
+                </CellSwitch>
               ),
               description: enabled ? 'Twitch 渠道已启用' : 'Twitch 渠道已停用',
               icon: 'lucide:power',
@@ -676,9 +678,11 @@ function TwitchAccountCard({
               </Dropdown.Popover>
             </Dropdown>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
-            <Switch size="lg" className="flex p-1 bg-default rounded-full" aria-label="启用 Twitch 账号" isSelected={draft.enabled} isDisabled={isDisabled || isSaving} onChange={(enabled) => onChange({ enabled })}>
-              <Switch.Control><Switch.Thumb /></Switch.Control>
-            </Switch>
+            <CellSwitch size="lg" className="flex p-1 bg-default rounded-full" aria-label="启用 Twitch 账号" isSelected={draft.enabled} isDisabled={isDisabled || isSaving} onChange={(enabled) => onChange({ enabled })}>
+              <CellSwitch.Trigger>
+                <CellSwitch.Control />
+              </CellSwitch.Trigger>
+            </CellSwitch>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
             <Button isIconOnly size="sm" variant="tertiary" aria-label="编辑 Twitch 账号" onPress={() => onEdit(account)} isDisabled={isDisabled || isSaving}>
               <Icon icon="lucide:pencil" className="size-4" />
@@ -802,9 +806,11 @@ function TwitchAccountModal({
                       <ItemCardGroup.Description>限制哪些 Twitch 用户或角色可以唤起 OpenClaw。</ItemCardGroup.Description>
                     </ItemCardGroup.Header>
                     <FormItem actionClassName="w-fit" description="开启后聊天消息需要提及机器人后才触发。" icon="lucide:at-sign" title="需要提及">
-                      <Switch size="lg" aria-label="Twitch 消息要求提及机器人" isSelected={form.requireMention} isDisabled={isSubmitting} onChange={(requireMention) => update({ requireMention })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="Twitch 消息要求提及机器人" isSelected={form.requireMention} isDisabled={isSubmitting} onChange={(requireMention) => update({ requireMention })}>
+                        <CellSwitch.Trigger>
+                          <CellSwitch.Control />
+                        </CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                   </ItemCardGroup>
 

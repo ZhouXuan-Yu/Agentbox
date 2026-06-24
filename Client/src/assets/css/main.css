@@ -8,3 +8,5 @@
 @import "./theme.less";
 @import "./index.css";
 @import "./tauri.css";
+
+@source "../../../packages/heroui-pro/src/components/**/*.{ts,tsx}";

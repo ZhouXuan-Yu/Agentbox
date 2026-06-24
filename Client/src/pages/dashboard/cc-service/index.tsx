@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode, RefObject } from 'react'
 import type { Key } from '@heroui/react'
-import { Button, Alert, AlertDialog, Card, Chip, Input, InputGroup, Label, ListBox, Separator, Skeleton, Spinner, Switch, Tabs, TextField, Tooltip, toast } from '@heroui/react'
-import { CellSelect, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
+import { Button, Alert, AlertDialog, Card, Chip, Input, InputGroup, Label, ListBox, Separator, Skeleton, Spinner, Tabs, TextField, Tooltip, toast } from '@heroui/react'
+import { CellSelect, CellSwitch, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
 import Editor from '@monaco-editor/react'
 import { Icon } from '@iconify/react'
 import type {
@@ -1210,11 +1210,11 @@ function ConfigFieldControl({ config, disabled, field, onChange }: { config: Rec
 
   if (field.type === 'toggle') {
     return (
-      <Switch size="lg" aria-label={field.label} isSelected={value === true} isDisabled={disabled} onChange={(isSelected) => onChange(field.path, isSelected)}>
-        <Switch.Control>
-          <Switch.Thumb />
-        </Switch.Control>
-      </Switch>
+      <CellSwitch size="lg" aria-label={field.label} isSelected={value === true} isDisabled={disabled} onChange={(isSelected) => onChange(field.path, isSelected)}>
+        <CellSwitch.Trigger>
+          <CellSwitch.Control />
+        </CellSwitch.Trigger>
+      </CellSwitch>
     )
   }
 

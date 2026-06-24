@@ -1,5 +1,6 @@
 import { type SVGProps, useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Card, Chip, Modal, SearchField, Skeleton, Switch, toast } from '@heroui/react'
+import { Button, Card, Chip, Modal, SearchField, Skeleton, toast } from '@heroui/react'
+import { CellSwitch } from '@heroui-pro/react'
 import { PieChart, Segment } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type { HermesSkillDetailResponse, HermesSkillHubResult, HermesSkillInfo, HermesSkillsResponse } from '@/api'
@@ -871,17 +872,17 @@ function HermesSkillCard({
             <Button isIconOnly size="sm" variant="ghost" onPress={() => onOpenDetail(skill)} aria-label="查看技能详情">
               <Icon icon="lucide:info" />
             </Button>
-            <Switch
+            <CellSwitch
               aria-label={`${skill.disabled ? '启用' : '停用'} ${skill.name}`}
               isDisabled={mutating}
               isSelected={!skill.disabled}
               size="lg"
               onChange={() => onToggle(skill)}
             >
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
-            </Switch>
+              <CellSwitch.Trigger>
+                <CellSwitch.Control />
+              </CellSwitch.Trigger>
+            </CellSwitch>
           </div>
         </div>
         {/* 

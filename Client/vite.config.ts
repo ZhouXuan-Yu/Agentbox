@@ -4,6 +4,10 @@ import tailwindcss from '@tailwindcss/vite'
 import Pages from 'vite-plugin-pages'
 import AutoImport from 'unplugin-auto-import/vite'
 import { reactResolver } from 'vite-plugin-pages'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
@@ -47,6 +51,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': '/src',
+        '@heroui-pro/react': path.resolve(__dirname, '../packages/heroui-pro/src/index.ts'),
       },
     },
   }

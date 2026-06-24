@@ -2,8 +2,8 @@ import type { ReactNode, RefObject } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as QRCode from 'qrcode'
 import type { Key } from '@heroui/react'
-import { AlertDialog, Alert, Button, Card, Chip, Dropdown, InputGroup, ListBox, Modal, Skeleton, Switch, toast } from '@heroui/react'
-import { CellSelect, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
+import { AlertDialog, Alert, Button, Card, Chip, Dropdown, InputGroup, ListBox, Modal, Skeleton, toast } from '@heroui/react'
+import { CellSelect, CellSwitch, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type {
   OpenClawAgentSummary,
@@ -722,17 +722,17 @@ export function OpenClawWeComPanel() {
             },
             {
               action: installed && !isTaskRunning && !isLoading ? (
-                <Switch
+                <CellSwitch
                   size="lg"
                   aria-label="切换企业微信渠道总开关"
                   isSelected={enabled}
                   isDisabled={!configured || savingChannelEnabled}
                   onChange={(nextEnabled) => void toggleChannel(nextEnabled)}
                 >
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch>
+                  <CellSwitch.Trigger>
+                    <CellSwitch.Control />
+                  </CellSwitch.Trigger>
+                </CellSwitch>
               ) : null,
               description: enabled ? '企业微信渠道已启用' : '企业微信渠道已停用',
               icon: 'lucide:power',
@@ -970,9 +970,9 @@ function WeComAccountCard({
               </Dropdown.Popover>
             </Dropdown>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
-            <Switch size="lg" className="flex p-1 bg-default rounded-full" aria-label="启用企业微信账号" isSelected={draft.enabled} isDisabled={isDisabled || isSaving} onChange={(enabled) => onUpdate({ enabled })}>
-              <Switch.Control><Switch.Thumb /></Switch.Control>
-            </Switch>
+            <CellSwitch size="lg" className="flex p-1 bg-default rounded-full" aria-label="启用企业微信账号" isSelected={draft.enabled} isDisabled={isDisabled || isSaving} onChange={(enabled) => onUpdate({ enabled })}>
+              <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+            </CellSwitch>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
             <Button isIconOnly size="sm" variant="tertiary" aria-label="编辑企业微信账号" isDisabled={isDisabled || isSaving} onPress={() => onEdit(account)}>
               <Icon icon="lucide:pencil" className="size-4" />
@@ -1093,9 +1093,9 @@ function WeComAccountModal({
                         <ClearableInput value={form.websocketUrl} disabled={isSubmitting} placeholder="wss://openws.work.weixin.qq.com" onChange={(websocketUrl) => update({ websocketUrl })} />
                       </FormItem>
                       <FormItem actionClassName="w-fit" description="发送“思考中”占位消息。" icon="lucide:message-circle-dashed" title="思考占位">
-                        <Switch size="lg" aria-label="发送思考占位消息" isSelected={form.sendThinkingMessage} isDisabled={isSubmitting} onChange={(sendThinkingMessage) => update({ sendThinkingMessage })}>
-                          <Switch.Control><Switch.Thumb /></Switch.Control>
-                        </Switch>
+                        <CellSwitch size="lg" aria-label="发送思考占位消息" isSelected={form.sendThinkingMessage} isDisabled={isSubmitting} onChange={(sendThinkingMessage) => update({ sendThinkingMessage })}>
+                          <CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger>
+                        </CellSwitch>
                       </FormItem>
                     </ItemCardGroup>
 
@@ -1166,13 +1166,13 @@ function WeComAccountModal({
                         <ItemCardGroup.Description>按用户或群自动创建隔离 Agent。</ItemCardGroup.Description>
                       </ItemCardGroup.Header>
                       <FormItem actionClassName="w-fit" description="启用动态 Agent 路由。" icon="lucide:route" title="动态 Agent">
-                        <Switch size="lg" aria-label="启用动态 Agent" isSelected={form.dynamicAgentsEnabled} isDisabled={isSubmitting} onChange={(dynamicAgentsEnabled) => update({ dynamicAgentsEnabled })}><Switch.Control><Switch.Thumb /></Switch.Control></Switch>
+                        <CellSwitch size="lg" aria-label="启用动态 Agent" isSelected={form.dynamicAgentsEnabled} isDisabled={isSubmitting} onChange={(dynamicAgentsEnabled) => update({ dynamicAgentsEnabled })}><CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger></CellSwitch>
                       </FormItem>
                       <FormItem actionClassName="w-fit" description="私聊为每个用户创建独立 Agent。" icon="lucide:user-plus" title="私聊建 Agent">
-                        <Switch size="lg" aria-label="私聊创建 Agent" isSelected={form.dynamicDmCreateAgent} isDisabled={isSubmitting} onChange={(dynamicDmCreateAgent) => update({ dynamicDmCreateAgent })}><Switch.Control><Switch.Thumb /></Switch.Control></Switch>
+                        <CellSwitch size="lg" aria-label="私聊创建 Agent" isSelected={form.dynamicDmCreateAgent} isDisabled={isSubmitting} onChange={(dynamicDmCreateAgent) => update({ dynamicDmCreateAgent })}><CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger></CellSwitch>
                       </FormItem>
                       <FormItem actionClassName="w-fit" description="群聊启用动态 Agent。" icon="lucide:users-round" title="群聊动态">
-                        <Switch size="lg" aria-label="群聊动态 Agent" isSelected={form.dynamicGroupEnabled} isDisabled={isSubmitting} onChange={(dynamicGroupEnabled) => update({ dynamicGroupEnabled })}><Switch.Control><Switch.Thumb /></Switch.Control></Switch>
+                        <CellSwitch size="lg" aria-label="群聊动态 Agent" isSelected={form.dynamicGroupEnabled} isDisabled={isSubmitting} onChange={(dynamicGroupEnabled) => update({ dynamicGroupEnabled })}><CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger></CellSwitch>
                       </FormItem>
                     </ItemCardGroup>
                     <TextareaCard description="管理员用户会绕过动态路由，使用主 Agent。" disabled={isSubmitting} icon="lucide:user-cog" placeholder="admin_user_id" title="动态 Agent 管理员" value={form.dynamicAdminUsers} onChange={(dynamicAdminUsers) => update({ dynamicAdminUsers })} />
@@ -1183,7 +1183,7 @@ function WeComAccountModal({
                         <ItemCardGroup.Description>本地媒体路径、临时目录、固定出口代理和网络重试。</ItemCardGroup.Description>
                       </ItemCardGroup.Header>
                       <FormItem actionClassName="w-fit" description="Gateway 启动时清理临时媒体。" icon="lucide:trash" title="启动清理">
-                        <Switch size="lg" aria-label="启动清理媒体" isSelected={form.mediaCleanupOnStart} isDisabled={isSubmitting} onChange={(mediaCleanupOnStart) => update({ mediaCleanupOnStart })}><Switch.Control><Switch.Thumb /></Switch.Control></Switch>
+                        <CellSwitch size="lg" aria-label="启动清理媒体" isSelected={form.mediaCleanupOnStart} isDisabled={isSubmitting} onChange={(mediaCleanupOnStart) => update({ mediaCleanupOnStart })}><CellSwitch.Trigger><CellSwitch.Control /></CellSwitch.Trigger></CellSwitch>
                       </FormItem>
                       <FormItem description="媒体最大字节数。" icon="lucide:file-up" title="Media Max Bytes">
                         <ClearableInput value={form.mediaMaxBytes} disabled={isSubmitting} placeholder="20971520" onChange={(mediaMaxBytes) => update({ mediaMaxBytes })} />

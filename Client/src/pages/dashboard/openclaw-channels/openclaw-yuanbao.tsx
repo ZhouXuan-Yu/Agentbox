@@ -1,8 +1,8 @@
 import type { ReactNode, RefObject } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Key } from '@heroui/react'
-import { AlertDialog, Alert, Button, Card, Chip, Dropdown, InputGroup, ListBox, Modal, Separator, Skeleton, Switch, toast } from '@heroui/react'
-import { CellSelect, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
+import { AlertDialog, Alert, Button, Card, Chip, Dropdown, InputGroup, ListBox, Modal, Separator, Skeleton, toast } from '@heroui/react'
+import { CellSelect, CellSwitch, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type {
   OpenClawAgentSummary,
@@ -371,9 +371,11 @@ export function OpenClawYuanbaoBotPanel() {
             { description: enabled ? '元宝 Bot 渠道已启用' : '元宝 Bot 渠道已停用', icon: 'lucide:radio', loading: isLoading, ok: enabled, title: '运行状态' },
             {
               action: (
-                <Switch size="lg" aria-label="切换元宝 Bot 渠道总开关" isSelected={enabled} isDisabled={!configured || isTaskRunning || isLoading || savingChannelEnabled} onChange={(nextEnabled) => void updateChannelEnabled(nextEnabled)}>
-                  <Switch.Control><Switch.Thumb /></Switch.Control>
-                </Switch>
+                <CellSwitch size="lg" aria-label="切换元宝 Bot 渠道总开关" isSelected={enabled} isDisabled={!configured || isTaskRunning || isLoading || savingChannelEnabled} onChange={(nextEnabled) => void updateChannelEnabled(nextEnabled)}>
+                  <CellSwitch.Trigger>
+                    <CellSwitch.Control />
+                  </CellSwitch.Trigger>
+                </CellSwitch>
               ),
               description: enabled ? '元宝 Bot 渠道已启用' : '元宝 Bot 渠道已停用',
               icon: 'lucide:power',
@@ -534,9 +536,11 @@ function YuanbaoAccountCard({ account, agentOptions, draft, isDisabled, isSaving
               </Dropdown.Popover>
             </Dropdown>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
-            <Switch size="lg" className="flex p-1 bg-default rounded-full" aria-label="启用元宝 Bot 账号" isSelected={draft.enabled} isDisabled={isDisabled || isSaving} onChange={(enabled) => onChange({ enabled })}>
-              <Switch.Control><Switch.Thumb /></Switch.Control>
-            </Switch>
+            <CellSwitch size="lg" className="flex p-1 bg-default rounded-full" aria-label="启用元宝 Bot 账号" isSelected={draft.enabled} isDisabled={isDisabled || isSaving} onChange={(enabled) => onChange({ enabled })}>
+              <CellSwitch.Trigger>
+                <CellSwitch.Control />
+              </CellSwitch.Trigger>
+            </CellSwitch>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
             <Button isIconOnly size="sm" variant="tertiary" aria-label="编辑元宝 Bot 账号" onPress={() => onEdit(account)} isDisabled={isDisabled || isSaving}>
               <Icon icon="lucide:pencil" className="size-4" />

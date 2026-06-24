@@ -1,8 +1,8 @@
 import type { ReactNode, RefObject } from 'react'
 import { useCallback, useMemo, useEffect, useRef, useState } from 'react'
 import * as QRCode from 'qrcode'
-import { AlertDialog, Alert, Button, Card, Chip, Dropdown, Modal, Skeleton, Switch, toast } from '@heroui/react'
-import { ItemCard } from '@heroui-pro/react'
+import { AlertDialog, Alert, Button, Card, Chip, Dropdown, Modal, Skeleton, toast } from '@heroui/react'
+import { CellSwitch, ItemCard } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type {
   OpenClawAgentSummary,
@@ -426,17 +426,17 @@ export function OpenClawWeixinPanel() {
             },
             {
               action: (
-                <Switch
+                <CellSwitch
                   size="lg"
                   aria-label="切换多账号上下文隔离"
                   isSelected={dmScopeIsolated}
                   isDisabled={isTaskRunning || isLoading}
                   onChange={enableIsolation}
                 >
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch>
+                  <CellSwitch.Trigger>
+                    <CellSwitch.Control />
+                  </CellSwitch.Trigger>
+                </CellSwitch>
               ),
               description: dmScopeIsolated ? '按账号和会话隔离上下文' : '当前使用主会话上下文',
               icon: 'lucide:split',
@@ -446,17 +446,17 @@ export function OpenClawWeixinPanel() {
             },
             {
               action: (
-                <Switch
+                <CellSwitch
                   size="lg"
                   aria-label="切换微信渠道总开关"
                   isSelected={Boolean(status?.enabled)}
                   isDisabled={!installed || isTaskRunning || isLoading || savingChannelEnabled}
                   onChange={(enabled) => void updateChannelEnabled(enabled)}
                 >
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch>
+                  <CellSwitch.Trigger>
+                    <CellSwitch.Control />
+                  </CellSwitch.Trigger>
+                </CellSwitch>
               ),
               description: status?.enabled ? '微信渠道已启用' : '微信渠道已停用',
               icon: 'lucide:power',
@@ -655,17 +655,17 @@ function WeixinAccountCard({
             </Dropdown>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
             <div className="flex p-1 bg-default rounded-full">
-              <Switch
+              <CellSwitch
                 size="lg"
                 aria-label="启用微信账号"
                 isSelected={draft.enabled}
                 isDisabled={isDisabled || isSaving}
                 onChange={(enabled) => onChange({ enabled })}
               >
-                <Switch.Control>
-                  <Switch.Thumb />
-                </Switch.Control>
-              </Switch>
+                <CellSwitch.Trigger>
+                  <CellSwitch.Control />
+                </CellSwitch.Trigger>
+              </CellSwitch>
             </div>
 
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />

@@ -1,7 +1,7 @@
 import type { PropsWithChildren, ReactNode } from 'react'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
-import { AlertDialog, Button, Chip, Dropdown, Input, Separator, Switch, toast } from '@heroui/react'
-import { AppLayout, ItemCard, ItemCardGroup, Navbar, Segment, Sidebar } from '@heroui-pro/react'
+import { AlertDialog, Button, Chip, Dropdown, Input, Separator, toast } from '@heroui/react'
+import { AppLayout, CellSwitch, ItemCard, ItemCardGroup, Navbar, Segment, Sidebar } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
@@ -1102,15 +1102,17 @@ function SecuritySettingsDialog({ isOpen, onOpenChange }: { isOpen: boolean; onO
                       </SettingsItem>
                       <Separator />
                       <SettingsItem actionClassName="w-fit" description="关闭密码保护，任何人都可以直接访问。" icon="lucide:shield-off" iconTone="danger" title="无视风险模式">
-                        <Switch
+                        <CellSwitch
                           size="lg"
                           aria-label="无视风险模式"
                           isDisabled={isSaving || isCheckingAccessProtection}
                           isSelected={ignoreRiskMode}
                           onChange={setIgnoreRiskMode}
                         >
-                          <Switch.Control><Switch.Thumb /></Switch.Control>
-                        </Switch>
+                          <CellSwitch.Trigger>
+                            <CellSwitch.Control />
+                          </CellSwitch.Trigger>
+                        </CellSwitch>
                       </SettingsItem>
                     </ItemCardGroup>
                   ) : null}
@@ -1129,15 +1131,17 @@ function SecuritySettingsDialog({ isOpen, onOpenChange }: { isOpen: boolean; onO
                         icon="lucide:rocket"
                         title="开机自启"
                       >
-                        <Switch
+                        <CellSwitch
                           size="lg"
                           aria-label="开机自启"
                           isDisabled={isSaving || isMaintenanceRunning || isStartupSettingsBusy}
                           isSelected={startupSettings.autoStart}
                           onChange={updateAutoStart}
                         >
-                          <Switch.Control><Switch.Thumb /></Switch.Control>
-                        </Switch>
+                          <CellSwitch.Trigger>
+                            <CellSwitch.Control />
+                          </CellSwitch.Trigger>
+                        </CellSwitch>
                       </SettingsItem>
                       {startupSettings.autoStart ? (
                         <>
@@ -1148,15 +1152,17 @@ function SecuritySettingsDialog({ isOpen, onOpenChange }: { isOpen: boolean; onO
                             icon="lucide:eye-off"
                             title="静默启动"
                           >
-                            <Switch
+                            <CellSwitch
                               size="lg"
                               aria-label="静默启动"
                               isDisabled={isSaving || isMaintenanceRunning || isStartupSettingsBusy}
                               isSelected={startupSettings.silentStartup}
                               onChange={updateSilentStartup}
                             >
-                              <Switch.Control><Switch.Thumb /></Switch.Control>
-                            </Switch>
+                              <CellSwitch.Trigger>
+                                <CellSwitch.Control />
+                              </CellSwitch.Trigger>
+                            </CellSwitch>
                           </SettingsItem>
                         </>
                       ) : null}

@@ -152,6 +152,13 @@ Client/src-tauri/bundle/
 *.zip
 *.tar
 *.tar.gz
+
+# AI assistant config
+.claude/
+.meta-kim/
+
+# Temporary dev scripts
+Client/scripts/mock-backend.mjs
 *.tgz
 *.gz
 *.7z

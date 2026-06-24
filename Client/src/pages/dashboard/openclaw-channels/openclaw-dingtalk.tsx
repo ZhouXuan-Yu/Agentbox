@@ -2,8 +2,8 @@ import type { ReactNode, RefObject } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as QRCode from 'qrcode'
 import type { Key } from '@heroui/react'
-import { AlertDialog, Alert, Button, Card, Chip, Dropdown, InputGroup, ListBox, Modal, Skeleton, Switch, toast } from '@heroui/react'
-import { CellSelect, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
+import { AlertDialog, Alert, Button, Card, Chip, Dropdown, InputGroup, ListBox, Modal, Skeleton, toast } from '@heroui/react'
+import { CellSelect, CellSwitch, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type {
   OpenClawAgentSummary,
@@ -672,17 +672,17 @@ export function OpenClawDingTalkPanel() {
             },
             {
               action: (
-                <Switch
+                <CellSwitch
                   size="lg"
                   aria-label="切换钉钉渠道总开关"
                   isSelected={enabled}
                   isDisabled={!configured || isTaskRunning || isLoading || savingChannelEnabled}
                   onChange={(nextEnabled) => void updateChannelEnabled(nextEnabled)}
                 >
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch>
+                  <CellSwitch.Trigger>
+                    <CellSwitch.Control />
+                  </CellSwitch.Trigger>
+                </CellSwitch>
               ),
               description: enabled ? '钉钉渠道已启用' : '钉钉渠道已停用',
               icon: 'lucide:power',
@@ -907,9 +907,11 @@ function DingTalkAccountCard({
               </Dropdown.Popover>
             </Dropdown>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
-            <Switch size="lg" className="flex p-1 bg-default rounded-full" aria-label="启用钉钉账号" isSelected={draft.enabled} isDisabled={isDisabled || isSaving} onChange={(enabled) => onChange({ enabled })}>
-              <Switch.Control><Switch.Thumb /></Switch.Control>
-            </Switch>
+            <CellSwitch size="lg" className="flex p-1 bg-default rounded-full" aria-label="启用钉钉账号" isSelected={draft.enabled} isDisabled={isDisabled || isSaving} onChange={(enabled) => onChange({ enabled })}>
+              <CellSwitch.Trigger>
+                <CellSwitch.Control />
+              </CellSwitch.Trigger>
+            </CellSwitch>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
             <Button isIconOnly size="sm" variant="tertiary" aria-label="编辑钉钉账号" onPress={() => onEdit(account)} isDisabled={isDisabled || isSaving}>
               <Icon icon="lucide:pencil" className="size-4" />
@@ -1020,9 +1022,11 @@ function DingTalkAccountModal({
                       <FriendlySelect ariaLabel="群聊策略" isDisabled={isSubmitting} options={groupPolicyOptions} value={form.groupPolicy || 'inherit'} onChange={(value) => update({ groupPolicy: String(value ?? 'inherit') })} />
                     </FormItem>
                     <FormItem actionClassName="w-fit" description="群消息需要 @ 机器人后才触发。" icon="lucide:at-sign" title="群聊需 @">
-                      <Switch size="lg" aria-label="群聊要求提及机器人" isSelected={form.requireMention} isDisabled={isSubmitting} onChange={(requireMention) => update({ requireMention })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="群聊要求提及机器人" isSelected={form.requireMention} isDisabled={isSubmitting} onChange={(requireMention) => update({ requireMention })}>
+                        <CellSwitch.Trigger>
+                          <CellSwitch.Control />
+                        </CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                   </ItemCardGroup>
                 </div>
@@ -1068,19 +1072,25 @@ function DingTalkAccountModal({
                       <FriendlySelect ariaLabel="群会话范围" isDisabled={isSubmitting} options={groupSessionScopeOptions} value={form.groupSessionScope || 'inherit'} onChange={(value) => update({ groupSessionScope: String(value ?? 'inherit') })} />
                     </FormItem>
                     <FormItem actionClassName="w-fit" description="按会话隔离上下文。" icon="lucide:split" title="会话隔离">
-                      <Switch size="lg" aria-label="按会话隔离上下文" isSelected={form.separateSessionByConversation} isDisabled={isSubmitting} onChange={(separateSessionByConversation) => update({ separateSessionByConversation })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="按会话隔离上下文" isSelected={form.separateSessionByConversation} isDisabled={isSubmitting} onChange={(separateSessionByConversation) => update({ separateSessionByConversation })}>
+                        <CellSwitch.Trigger>
+                          <CellSwitch.Control />
+                        </CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                     <FormItem actionClassName="w-fit" description="跨会话共享记忆。" icon="lucide:brain" title="共享记忆">
-                      <Switch size="lg" aria-label="跨会话共享记忆" isSelected={form.sharedMemoryAcrossConversations} isDisabled={isSubmitting} onChange={(sharedMemoryAcrossConversations) => update({ sharedMemoryAcrossConversations })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="跨会话共享记忆" isSelected={form.sharedMemoryAcrossConversations} isDisabled={isSubmitting} onChange={(sharedMemoryAcrossConversations) => update({ sharedMemoryAcrossConversations })}>
+                        <CellSwitch.Trigger>
+                          <CellSwitch.Control />
+                        </CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                     <FormItem actionClassName="w-fit" description="长任务先回复确认文本。" icon="lucide:timer" title="异步模式">
-                      <Switch size="lg" aria-label="启用异步模式" isSelected={form.asyncMode} isDisabled={isSubmitting} onChange={(asyncMode) => update({ asyncMode })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="启用异步模式" isSelected={form.asyncMode} isDisabled={isSubmitting} onChange={(asyncMode) => update({ asyncMode })}>
+                        <CellSwitch.Trigger>
+                          <CellSwitch.Control />
+                        </CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                     <FormItem description="异步模式开启时发送。" icon="lucide:message-square-text" title="确认文本">
                       <ClearableInput value={form.ackText} disabled={isSubmitting} placeholder="已收到，正在处理。" onChange={(ackText) => update({ ackText })} />
@@ -1093,19 +1103,25 @@ function DingTalkAccountModal({
                       <ItemCardGroup.Description>控制钉钉文档、媒体上传和上下文限额。</ItemCardGroup.Description>
                     </ItemCardGroup.Header>
                     <FormItem actionClassName="w-fit" description="启用文档相关工具。" icon="lucide:file-text" title="文档工具">
-                      <Switch size="lg" aria-label="启用文档工具" isSelected={form.toolsDocs} isDisabled={isSubmitting} onChange={(toolsDocs) => update({ toolsDocs })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="启用文档工具" isSelected={form.toolsDocs} isDisabled={isSubmitting} onChange={(toolsDocs) => update({ toolsDocs })}>
+                        <CellSwitch.Trigger>
+                          <CellSwitch.Control />
+                        </CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                     <FormItem actionClassName="w-fit" description="启用媒体相关工具。" icon="lucide:image" title="媒体工具">
-                      <Switch size="lg" aria-label="启用媒体工具" isSelected={form.toolsMedia} isDisabled={isSubmitting} onChange={(toolsMedia) => update({ toolsMedia })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="启用媒体工具" isSelected={form.toolsMedia} isDisabled={isSubmitting} onChange={(toolsMedia) => update({ toolsMedia })}>
+                        <CellSwitch.Trigger>
+                          <CellSwitch.Control />
+                        </CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                     <FormItem actionClassName="w-fit" description="允许上传媒体到钉钉。" icon="lucide:upload-cloud" title="媒体上传">
-                      <Switch size="lg" aria-label="启用媒体上传" isSelected={form.enableMediaUpload} isDisabled={isSubmitting} onChange={(enableMediaUpload) => update({ enableMediaUpload })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="启用媒体上传" isSelected={form.enableMediaUpload} isDisabled={isSubmitting} onChange={(enableMediaUpload) => update({ enableMediaUpload })}>
+                        <CellSwitch.Trigger>
+                          <CellSwitch.Control />
+                        </CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                     <FormItem description="留空使用 connector 默认值。" icon="lucide:history" title="历史消息数">
                       <ClearableInput value={form.historyLimit} disabled={isSubmitting} placeholder="0" onChange={(historyLimit) => update({ historyLimit })} />
@@ -1124,19 +1140,25 @@ function DingTalkAccountModal({
                       <ItemCardGroup.Description>多 Agent 协作和连接排障。</ItemCardGroup.Description>
                     </ItemCardGroup.Header>
                     <FormItem actionClassName="w-fit" description="输出 connector 调试日志。" icon="lucide:bug" title="Debug">
-                      <Switch size="lg" aria-label="启用 debug" isSelected={form.debug} isDisabled={isSubmitting} onChange={(debug) => update({ debug })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="启用 debug" isSelected={form.debug} isDisabled={isSubmitting} onChange={(debug) => update({ debug })}>
+                        <CellSwitch.Trigger>
+                          <CellSwitch.Control />
+                        </CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                     <FormItem actionClassName="w-fit" description="解析发送者名称。" icon="lucide:id-card" title="解析发送者">
-                      <Switch size="lg" aria-label="解析发送者名称" isSelected={form.resolveSenderNames} isDisabled={isSubmitting} onChange={(resolveSenderNames) => update({ resolveSenderNames })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="解析发送者名称" isSelected={form.resolveSenderNames} isDisabled={isSubmitting} onChange={(resolveSenderNames) => update({ resolveSenderNames })}>
+                        <CellSwitch.Trigger>
+                          <CellSwitch.Control />
+                        </CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                     <FormItem actionClassName="w-fit" description="展示正在输入状态。" icon="lucide:ellipsis" title="输入状态">
-                      <Switch size="lg" aria-label="展示正在输入状态" isSelected={form.typingIndicator} isDisabled={isSubmitting} onChange={(typingIndicator) => update({ typingIndicator })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="展示正在输入状态" isSelected={form.typingIndicator} isDisabled={isSubmitting} onChange={(typingIndicator) => update({ typingIndicator })}>
+                        <CellSwitch.Trigger>
+                          <CellSwitch.Control />
+                        </CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                     <FormItem description="自定义 DWClient gateway endpoint。" icon="lucide:plug" title="Endpoint">
                       <ClearableInput value={form.endpoint} disabled={isSubmitting} placeholder="https://..." onChange={(endpoint) => update({ endpoint })} />

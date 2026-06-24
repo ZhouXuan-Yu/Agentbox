@@ -1,8 +1,8 @@
 import type { ReactNode, RefObject } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Key } from '@heroui/react'
-import { Alert, AlertDialog, Button, Card, Chip, Dropdown, InputGroup, ListBox, Modal, Skeleton, Switch, toast } from '@heroui/react'
-import { CellSelect, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
+import { Alert, AlertDialog, Button, Card, Chip, Dropdown, InputGroup, ListBox, Modal, Skeleton, toast } from '@heroui/react'
+import { CellSelect, CellSwitch, ItemCard, ItemCardGroup, Segment } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import type {
   OpenClawAgentSummary,
@@ -499,15 +499,17 @@ export function OpenClawWhatsAppPanel() {
             },
             {
               action: (
-                <Switch
+                <CellSwitch
                   size="lg"
                   aria-label="切换 WhatsApp 渠道总开关"
                   isSelected={enabled}
                   isDisabled={!installed || isTaskRunning || isLoading || savingChannelEnabled}
                   onChange={(nextEnabled) => void updateChannelEnabled(nextEnabled)}
                 >
-                  <Switch.Control><Switch.Thumb /></Switch.Control>
-                </Switch>
+                  <CellSwitch.Trigger>
+                    <CellSwitch.Control />
+                  </CellSwitch.Trigger>
+                </CellSwitch>
               ),
               description: enabled ? 'WhatsApp 渠道已启用' : 'WhatsApp 渠道已停用',
               icon: 'lucide:power',
@@ -774,9 +776,11 @@ function WhatsAppAccountCard({
               <Icon icon="lucide:log-out" className="size-4" />
             </Button>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
-            <Switch size="lg" aria-label="启用 WhatsApp 账号" isSelected={draft.enabled} isDisabled={isDisabled || isSaving} onChange={(enabled) => onChange({ enabled })}>
-              <Switch.Control><Switch.Thumb /></Switch.Control>
-            </Switch>
+            <CellSwitch size="lg" aria-label="启用 WhatsApp 账号" isSelected={draft.enabled} isDisabled={isDisabled || isSaving} onChange={(enabled) => onChange({ enabled })}>
+              <CellSwitch.Trigger>
+                <CellSwitch.Control />
+              </CellSwitch.Trigger>
+            </CellSwitch>
             <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
             <Button isIconOnly size="sm" variant="tertiary" aria-label="删除 WhatsApp 账号配置" onPress={() => onDelete(account)} isDisabled={isDisabled || isSaving}>
               <Icon icon="lucide:trash-2" className="size-4" />
@@ -880,14 +884,18 @@ function WhatsAppAccountModal({
                       <FriendlySelect ariaLabel="群聊策略" isDisabled={isSubmitting} options={groupPolicyOptions} value={form.groupPolicy || 'inherit'} onChange={(value) => update({ groupPolicy: String(value ?? 'inherit') })} />
                     </FormItem>
                     <FormItem actionClassName="w-fit" description="个人号码 fallback 时打开。" icon="lucide:user-round-check" title="Self Chat">
-                      <Switch size="lg" aria-label="启用 Self Chat 模式" isSelected={form.selfChatMode} isDisabled={isSubmitting} onChange={(selfChatMode) => update({ selfChatMode })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="启用 Self Chat 模式" isSelected={form.selfChatMode} isDisabled={isSubmitting} onChange={(selfChatMode) => update({ selfChatMode })}>
+                        <CellSwitch.Trigger>
+                          <CellSwitch.Control />
+                        </CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                     <FormItem actionClassName="w-fit" description="默认开启，self-chat 会自动跳过。" icon="lucide:check-check" title="已读回执">
-                      <Switch size="lg" aria-label="发送已读回执" isSelected={form.sendReadReceipts} isDisabled={isSubmitting} onChange={(sendReadReceipts) => update({ sendReadReceipts })}>
-                        <Switch.Control><Switch.Thumb /></Switch.Control>
-                      </Switch>
+                      <CellSwitch size="lg" aria-label="发送已读回执" isSelected={form.sendReadReceipts} isDisabled={isSubmitting} onChange={(sendReadReceipts) => update({ sendReadReceipts })}>
+                        <CellSwitch.Trigger>
+                          <CellSwitch.Control />
+                        </CellSwitch.Trigger>
+                      </CellSwitch>
                     </FormItem>
                   </ItemCardGroup>
                   <TextareaCard description="支持逗号或换行分隔；使用 E.164 号码，如 +15551234567。" disabled={isSubmitting} icon="lucide:users" placeholder="+15551234567" title="DM 准入号码" value={form.allowFrom} onChange={(allowFrom) => update({ allowFrom })} />

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { AlertDialog, Button, Card, Chip, Input, Label, ListBox, Separator, Skeleton, Switch, toast } from '@heroui/react'
-import { CellSelect, ItemCard, ItemCardGroup } from '@heroui-pro/react'
+import { AlertDialog, Button, Card, Chip, Input, Label, ListBox, Separator, Skeleton, toast } from '@heroui/react'
+import { CellSelect, CellSwitch, PieChart, Segment } from '@heroui-pro/react'
 import { Icon } from '@iconify/react'
 import {
   backfillOpenClawDreamDiary,
@@ -989,15 +989,17 @@ function DreamingSettingsGroup({
           </div>
         </ItemCardGroup.Header>
         <SettingItem icon="lucide:power" title="Dreaming">
-          <Switch
+          <CellSwitch
             size="lg"
             aria-label="启用 Dreaming"
             isDisabled={isSyncing}
             isSelected={enabled}
             onChange={onToggle}
           >
-            <Switch.Control><Switch.Thumb /></Switch.Control>
-          </Switch>
+            <CellSwitch.Trigger>
+              <CellSwitch.Control />
+            </CellSwitch.Trigger>
+          </CellSwitch>
         </SettingItem>
         <Separator />
         <SettingItem icon="lucide:calendar-clock" title="频率">
