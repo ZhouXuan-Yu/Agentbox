@@ -67,6 +67,7 @@ declare global {
   const use: typeof import('react').use
   const useActionState: typeof import('react').useActionState
   const useAppUpdateStore: typeof import('./stores/update').useAppUpdateStore
+  const useAutomationControlStore: typeof import('./stores/automation-control').useAutomationControlStore
   const useCCConnectEnvironmentStore: typeof import('./stores/cc-connect-environment').useCCConnectEnvironmentStore
   const useCallback: typeof import('react').useCallback
   const useClientVersion: typeof import('./hooks/useClientVersion').useClientVersion

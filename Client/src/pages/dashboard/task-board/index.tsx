@@ -285,9 +285,9 @@ function LiveDashboard({
           {/* History detail view */}
           {isViewingHistory && !hasActivity && <HistoryDetailView viewMode={viewMode} selectedJobId={selectedJobId} taskDesc={taskDesc} cronJobs={cronJobs} />}
 
-          {/* Visualization canvas — flow board or topology */}
+          {/* Visualization canvas — flow board or topology (live mode only) */}
           {hasActivity && viewMode === 'flow' && <FlowBoard />}
-          {viewMode === 'topology' && (
+          {!isViewingHistory && viewMode === 'topology' && (
             <TaskTopologyView
               selectedJobId={selectedJobId}
               taskDesc={taskDesc}

@@ -76,6 +76,7 @@
     "use": true,
     "useActionState": true,
     "useAppUpdateStore": true,
+    "useAutomationControlStore": true,
     "useCCConnectEnvironmentStore": true,
     "useCallback": true,
     "useClientVersion": true,

@@ -1,4 +1,4 @@
-package httpapi
+﻿package httpapi
 
 import (
 	"log/slog"
@@ -8,6 +8,7 @@ import (
 
 	"agent-box-server/internal/config"
 	"agent-box-server/internal/httpapi/handlers"
+	automationcontrol "agent-box-server/internal/httpapi/handlers/automationcontrol"
 	ccconnecthandlers "agent-box-server/internal/httpapi/handlers/ccconnect"
 	hermeshandlers "agent-box-server/internal/httpapi/handlers/hermes"
 	openclawhandlers "agent-box-server/internal/httpapi/handlers/openclaw"
@@ -144,6 +145,7 @@ func shouldLogRequestPath(path string) bool {
 		strings.HasPrefix(path, "/openclaw/") ||
 		strings.HasPrefix(path, "/hermes/") ||
 		strings.HasPrefix(path, "/cc-connect/") ||
+		strings.HasPrefix(path, "/automation-control/") ||
 		strings.HasPrefix(path, "/task-board/")
 }
 
@@ -2850,4 +2852,78 @@ func registerRoutes(api huma.API, authConfig *config.BackendAuthStore) {
 		Description: "以 Server-Sent Events 执行任务并实时返回可视化流程：阶段切换、步骤状态、工具调用、AI 推理和自我进化复盘。",
 		Tags:        []string{"TaskBoard"},
 	}, taskBoardStreamEvents(), handlers.TaskBoardExecuteStream)
+
+		// ── Automation Control routes ────────────────────────────
+
+		huma.Register(api, huma.Operation{
+			OperationID: "list-automation-control-workflows",
+			Method:      http.MethodGet,
+			Path:        "/automation-control/workflows",
+			Summary:     "List automation workflows",
+			Description: "返回自动化 workflow 列表，支持分页查询。",
+			Tags:        []string{"AutomationControl"},
+		}, automationcontrol.ListWorkflows)
+
+		huma.Register(api, huma.Operation{
+			OperationID: "create-automation-control-workflow",
+			Method:      http.MethodPost,
+			Path:        "/automation-control/workflows",
+			Summary:     "Create automation workflow",
+			Description: "创建新的自动化 workflow，同时生成 v1 draft 版本。",
+			Tags:        []string{"AutomationControl"},
+		}, automationcontrol.CreateWorkflow)
+
+		huma.Register(api, huma.Operation{
+			OperationID: "get-automation-control-workflow",
+			Method:      http.MethodGet,
+			Path:        "/automation-control/workflows/{id}",
+			Summary:     "Get automation workflow detail",
+			Description: "返回单个 workflow 的完整定义，含 nodes、edges 和 trigger。",
+			Tags:        []string{"AutomationControl"},
+		}, automationcontrol.GetWorkflow)
+
+		huma.Register(api, huma.Operation{
+			OperationID: "list-automation-control-runs",
+			Method:      http.MethodGet,
+			Path:        "/automation-control/runs",
+			Summary:     "List workflow runs",
+			Description: "按 workflowId 分页查询历史 run，支持按状态筛选。",
+			Tags:        []string{"AutomationControl"},
+		}, automationcontrol.ListRuns)
+
+		huma.Register(api, huma.Operation{
+			OperationID: "get-automation-control-run",
+			Method:      http.MethodGet,
+			Path:        "/automation-control/runs/{id}",
+			Summary:     "Get workflow run detail",
+			Description: "返回单次 run 详情，包含 node_runs 嵌套数组。",
+			Tags:        []string{"AutomationControl"},
+		}, automationcontrol.GetRun)
+
+		huma.Register(api, huma.Operation{
+			OperationID: "list-automation-control-versions",
+			Method:      http.MethodGet,
+			Path:        "/automation-control/workflows/{id}/versions",
+			Summary:     "List workflow versions",
+			Description: "返回 workflow 的所有版本历史。",
+			Tags:        []string{"AutomationControl"},
+		}, automationcontrol.ListVersions)
+
+		huma.Register(api, huma.Operation{
+			OperationID: "activate-automation-control-version",
+			Method:      http.MethodPost,
+			Path:        "/automation-control/workflows/{id}/versions/{versionId}/activate",
+			Summary:     "Activate a workflow version",
+			Description: "激活指定版本为当前活跃版本，其他版本自动归档。",
+			Tags:        []string{"AutomationControl"},
+		}, automationcontrol.ActivateVersion)
+
+		huma.Register(api, huma.Operation{
+			OperationID: "rollback-automation-control-version",
+			Method:      http.MethodPost,
+			Path:        "/automation-control/workflows/{id}/versions/{versionId}/rollback",
+			Summary:     "Rollback to a workflow version",
+			Description: "基于指定版本创建回滚 draft，并自动激活。",
+			Tags:        []string{"AutomationControl"},
+		}, automationcontrol.RollbackVersion)
 }

@@ -10,6 +10,7 @@ import (
 	"agent-box-server/internal/config"
 	"agent-box-server/internal/httpapi"
 	"agent-box-server/internal/httpapi/handlers"
+	automationcontrol "agent-box-server/internal/httpapi/handlers/automationcontrol"
 	ccconnecthandlers "agent-box-server/internal/httpapi/handlers/ccconnect"
 	hermeshandlers "agent-box-server/internal/httpapi/handlers/hermes"
 	openclawhandlers "agent-box-server/internal/httpapi/handlers/openclaw"
@@ -71,6 +72,11 @@ func New(ctx context.Context) (*App, error) {
 		_ = store.Close()
 		_ = logManager.Close()
 		return nil, fmt.Errorf("configure task board store: %w", err)
+	}
+	if err := automationcontrol.ConfigureAutomationControlStore(store.DB()); err != nil {
+		_ = store.Close()
+		_ = logManager.Close()
+		return nil, fmt.Errorf("configure automation control store: %w", err)
 	}
 	handlers.ConfigureMaintenanceStore(store.DB())
 	handlers.ConfigureMaintenanceSQLiteRebuildHooks(hermeshandlers.RebuildHermesTerminalStore, ccconnecthandlers.RebuildCCConnectSettingsStore, ccconnecthandlers.RebuildCCConnectTerminalStore)

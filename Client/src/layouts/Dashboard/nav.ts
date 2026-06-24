@@ -59,6 +59,7 @@ export const dashboardNavGroups: DashboardNavGroup[] = [
       { icon: 'lucide:puzzle', label: '扩展插件', path: '/dashboard/hermes-plugins' },
       { icon: 'lucide:calendar-clock', label: '定时任务', path: '/dashboard/hermes-cron' },
       { icon: 'lucide:sparkles', label: '技能中心', path: '/dashboard/cc-skills' },
+      { icon: 'lucide:radar', label: '自动化控制塔', path: '/dashboard/automation-control' },
       { icon: 'lucide:play-square', label: '任务看板', path: '/dashboard/task-board' },
     ],
   },
