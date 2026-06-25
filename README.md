@@ -1,72 +1,105 @@
 # AgentBox
 
-AgentBox 是一个面向多智能体运行环境的统一管理控制台。它把 OpenClaw、Hermes、CC-Connect 以及相关模型、技能、插件、日志、终端、工作区与部署配置集中到一个 Web/Tauri 应用里，方便开发、调试、部署和日常运维。
+<p align="center">
+  <strong>多智能体运行环境统一管理控制台</strong>
+</p>
 
-![AgentBox](./Screenshot/iShot_2026-05-24_14.21.56.png)
+<p align="center">
+  <a href="#概述">概述</a> •
+  <a href="#核心特性">特性</a> •
+  <a href="#快速开始">快速开始</a> •
+  <a href="#技术栈">技术栈</a> •
+  <a href="#项目结构">项目结构</a> •
+  <a href="#API-文档">API 文档</a>
+</p>
 
-本仓库包含：
+---
 
-- React + Vite 前端控制台
-- Tauri 桌面客户端工程
-- Go 后端 API 服务
-- Docker 独立部署配置
-- 安装脚本、发布脚本和静态发布数据
+![AgentBox Dashboard](./Screenshot/iShot_2026-05-24_14.21.56.png)
 
-## 目录结构
+## 概述
 
-```text
-.
-├── AgentBox-Docker/          # 已发布镜像的 docker compose 独立部署配置
-├── AgentBox-Docker-Build/    # AgentBox Linux 容器镜像构建脚本
-├── Anex-Credential/          # anex 登录凭据生成页面
-├── Client/                   # React/Vite 前端和 Tauri 桌面端
-├── Data/                     # 发布站点和客户端读取的静态 JSON/公告数据
-├── Docs/                     # 项目文档预留目录
-├── Installation-Script/      # Linux/macOS/Windows 安装脚本
-├── Releases-Build/           # 多平台发布构建和 latest.json 生成脚本
-└── Server/                   # Go 后端服务
-```
+AgentBox 是一个面向多智能体运行环境的**统一桌面管理控制台**，基于 Tauri 2 构建。它将 OpenClaw、Hermes、CC-Connect 三大 Agent 框架整合到一个应用中，提供智能体管理、模型配置、消息渠道、技能插件、定时任务、终端会话、实时执行看板、自动化工作流编排等全方位管理能力。
 
-`AgentBox-Apple/` 是本地签名、证书和私钥目录，默认被 `.gitignore` 忽略，不应提交到 Git。
+| 运行环境 | 说明 |
+|----------|------|
+| **OpenClaw** | 主力 Agent 框架，绑定 11 个消息渠道，支持梦境模式与技能扩展 |
+| **Hermes** | Kanban 任务驱动型 Agent，支持定时任务与任务执行可视化 |
+| **CC-Connect** | 项目管理型 Agent，支持多项目管理与终端会话 |
+
+## 核心特性
+
+### 🖥️ 智能体全生命周期管理
+
+- **智能体配置** — 创建、编辑、启停智能体，绑定模型与消息渠道
+- **模型管理** — 多供应商模型目录，支持本地/远程模型切换
+- **消息渠道** — 管理 11 个消息平台接入（Discord、Telegram、Slack 等）
+- **会话管理** — 实时查看和管理 Agent 会话状态
+
+### ⚡ 任务执行可视化看板
+
+- **实时执行流** — SSE 驱动的步骤级执行追踪
+- **Phase Stepper** — 准备 → 执行 → 复盘三阶段可视化
+- **工具调用面板** — 实时展示 Agent 工具链调用与返回
+- **AI 推理过程** — 思维链（Chain of Thought）持久化与展示
+- **执行历史** — 历史记录追溯，拓扑视图回放
+
+### 🔄 自动化控制塔
+
+- **工作流编排** — 可视化创建和管理自动化工作流
+- **版本管理** — 工作流版本控制与回滚
+- **执行引擎** — 支持手动触发与定时调度
+- **运行历史** — 完整的执行追溯与结果回看
+
+### 🧩 扩展生态
+
+- **技能中心** — 浏览、安装、配置 Agent 技能
+- **扩展插件** — 插件市场与本地管理
+- **定时任务** — Cron 任务管理，支持调度与即时触发
+- **梦境模式** — Agent 自主探索与学习模式
+
+### 🛠️ 运维工具
+
+- **终端模拟** — 内置 xterm 终端，直接操作 Agent 环境
+- **文件管理** — 工作区文件浏览与编辑
+- **服务管理** — 启停、监控 Agent 运行服务
+- **运行日志** — 实时日志查看，支持过滤与搜索
 
 ## 技术栈
 
-### 前端
+| 层级 | 技术 | 说明 |
+|------|------|------|
+| 桌面壳 | Tauri 2 | 跨平台桌面应用 |
+| 前端框架 | React 19 + TypeScript | SPA 控制台 |
+| 构建工具 | Vite 8 (rolldown) | 极速 HMR |
+| UI 组件库 | HeroUI + HeroUI Pro | 65+ Pro 组件 |
+| 样式 | Tailwind CSS v4 | 原子化 CSS |
+| 状态管理 | Zustand 5 | 轻量状态管理 |
+| 图表 | Recharts | 数据可视化 |
+| 编辑器 | Monaco Editor + xterm | 代码编辑 + 终端 |
+| 图标 | Iconify (Lucide) | 统一图标系统 |
+| 后端 | Go 1.26 | HTTP API 服务 |
+| HTTP 框架 | chi v5 + Huma v2 | REST + OpenAPI + SSE |
+| 数据库 | SQLite (modernc) | 纯 Go 实现，零依赖 |
+| 实时通信 | WebSocket + SSE | 双向实时推送 |
+| 包管理 | pnpm (monorepo) | workspace 管理 |
 
-- React 19
-- Vite 8
-- TypeScript
-- HeroUI / HeroUI Pro
-- React Router
-- Zustand
-- Tauri 2
+## 快速开始
 
-### 后端
+### 环境要求
 
-- Go 1.26
-- chi
-- Huma OpenAPI
-- nhooyr websocket
-- modernc SQLite
-- slog
-- Air 热重载
+- **Go** ≥ 1.26
+- **Node.js** ≥ 20
+- **pnpm** ≥ 9
 
-## 本地开发
-
-### 后端
-
-进入后端目录：
+### 后端启动
 
 ```bash
 cd Server
 go run github.com/air-verse/air@latest
 ```
 
-默认监听：
-
-```text
-http://127.0.0.1:8787
-```
+默认监听 `http://127.0.0.1:8787`，支持热重载。
 
 也可以直接运行：
 
@@ -75,9 +108,7 @@ cd Server
 go run ./cmd/agent-box
 ```
 
-### 前端
-
-进入前端目录：
+### 前端启动
 
 ```bash
 cd Client
@@ -85,17 +116,7 @@ pnpm install
 pnpm dev
 ```
 
-默认监听：
-
-```text
-http://127.0.0.1:5173
-```
-
-前端开发端口可通过 `Client/.env` 配置：
-
-```text
-FRONTEND_DEV_PORT=5173
-```
+默认监听 `http://127.0.0.1:5175`（端口可通过 `Client/.env` 配置）。
 
 ### Tauri 桌面开发
 
@@ -104,77 +125,7 @@ cd Client
 pnpm tauri:dev
 ```
 
-Tauri 开发模式会同步本地前端开发地址。
-
-## API 文档
-
-后端启动后可以访问：
-
-```text
-http://127.0.0.1:8787/docs
-```
-
-常用接口：
-
-- `GET /`：服务信息
-- `GET /api/health`：健康检查
-- `GET /api/environment`：主机环境检测
-- `GET /api/environment?refresh=true`：刷新环境缓存
-- `GET /openclaw/environment`：OpenClaw 环境检测
-- `GET /openclaw/config`：读取 OpenClaw 配置
-- `PUT /openclaw/config`：更新 OpenClaw 配置
-
-OpenAPI 文件：
-
-- `http://127.0.0.1:8787/openapi.json`
-- `http://127.0.0.1:8787/openapi.yaml`
-- `http://127.0.0.1:8787/openapi-3.0.json`
-
-## 环境变量
-
-后端示例配置见：
-
-```text
-Server/.env.example
-```
-
-常用变量：
-
-| 变量 | 默认值 | 说明 |
-| --- | --- | --- |
-| `APP_ENV` | `development` | 运行环境 |
-| `SERVER_HOST` | `127.0.0.1` | 后端监听地址 |
-| `SERVER_PORT` | `8787` | 后端监听端口 |
-| `DATABASE_URL` | `~/.agent-box/data.db` | SQLite 数据库地址 |
-| `AUTH_CONFIG_PATH` | `~/.agent-box/auth.json` | 认证配置路径 |
-| `AUTH_DEFAULT_TOKEN` | 空 | 首次生成认证配置时使用的默认 token |
-| `LOG_LEVEL` | `info` | `debug`、`info`、`warn`、`error` |
-| `MODEL_CATALOG_URL` | 官方发布地址 | 模型目录 URL |
-| `MODEL_INITIALIZATION_URL` | 官方发布地址 | 模型初始化配置 URL |
-| `OPENCLAW_PUBLIC_GATEWAY_URL` | 空 | OpenClaw Gateway 公网地址 |
-| `AGENTBOX_PUBLIC_URL` | 空 | AgentBox 公网访问地址 |
-
-Docker 部署变量见：
-
-```text
-AgentBox-Docker/.env.example
-```
-
-## 静态数据
-
-`Data/` 目录提供客户端和发布站点使用的静态内容：
-
-- `latest.json`：桌面端更新和 Linux 后端下载清单
-- `models.json`：模型供应商和模型目录
-- `install-packages.json`：安装脚本依赖下载地址
-- `notice.md`：客户端公告
-- `about.json`、`connect.json`、`promotion.json`：关于页、社群和推荐内容
-
-修改这些文件时注意保持 JSON 格式稳定，避免破坏客户端读取逻辑。
-
-## Docker 部署
-
-使用已发布镜像：
+### Docker 部署
 
 ```bash
 cd AgentBox-Docker
@@ -182,119 +133,139 @@ cp .env.example .env
 docker compose up -d
 ```
 
-默认端口：
-
 | 宿主机端口 | 用途 |
-| --- | --- |
+|-----------|------|
 | `8787` | AgentBox 控制台 |
 | `18789` | OpenClaw Gateway |
 | `8080` | WebDAV |
 
-构建容器镜像：
+## 项目结构
 
-```bash
-cd AgentBox-Docker-Build
-./build-image.sh
+```
+AgentBox/
+├── Client/                         # React + Vite 前端
+│   ├── src/
+│   │   ├── api/                    # API 调用层
+│   │   ├── components/             # 通用组件
+│   │   ├── hooks/                  # 自定义 Hooks
+│   │   ├── layouts/                # 布局组件
+│   │   ├── pages/                  # 页面（文件路由）
+│   │   │   ├── public/             # 公共页面（登录等）
+│   │   │   └── dashboard/          # Dashboard 页面（60+ 页面）
+│   │   │       ├── openclaw/       # OpenClaw 管理
+│   │   │       ├── hermes/         # Hermes 管理
+│   │   │       ├── cc/             # CC-Connect 管理
+│   │   │       ├── task-board/     # 任务执行看板
+│   │   │       └── automation-control/  # 自动化控制塔
+│   │   ├── stores/                 # Zustand 状态管理
+│   │   ├── types/                  # TypeScript 类型定义
+│   │   └── utils/                  # 工具函数
+│   └── src-tauri/                  # Tauri 桌面配置
+│
+├── Server/                         # Go 后端
+│   ├── cmd/agent-box/              # 程序入口
+│   └── internal/
+│       ├── app/                    # 应用初始化
+│       ├── config/                 # 配置管理
+│       ├── httpapi/
+│       │   ├── handlers/           # API Handler
+│       │   │   ├── openclaw/       # OpenClaw 子 handler
+│       │   │   ├── hermes/         # Hermes 子 handler
+│       │   │   ├── ccconnect/      # CC-Connect 子 handler
+│       │   │   └── automationcontrol/  # 自动化控制 handler
+│       │   └── router.go           # 路由注册
+│       ├── storage/                # SQLite 持久化
+│       ├── gateway/                # Gateway RPC 客户端
+│       └── realtime/               # WebSocket Hub
+│
+├── packages/
+│   └── heroui-pro/                 # HeroUI Pro 本地源码（65 组件）
+│
+├── AgentBox-Docker/                # Docker 部署配置
+├── AgentBox-Docker-Build/          # Docker 镜像构建
+├── Installation-Script/            # 安装脚本
+├── Releases-Build/                 # 多平台发布构建
+└── Screenshot/                     # 截图资源
 ```
 
-更多说明见：
+## API 文档
 
-- `AgentBox-Docker/README.md`
-- `AgentBox-Docker-Build/README.md`
+后端启动后访问 OpenAPI 文档：
 
-## 发布构建
-
-发布相关脚本集中在：
-
-```text
-Releases-Build/
+```
+http://127.0.0.1:8787/docs
 ```
 
-常用入口：
+### 常用端点
 
-- `Releases-Build/scripts/build.sh`
-- `Releases-Build/scripts/build-linux-backend.sh`
-- `Releases-Build/scripts/generate-latest-json.mjs`
-- `Releases-Build/Update/upload-latest-json.mjs`
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| `GET` | `/api/health` | 健康检查 |
+| `GET` | `/api/environment` | 主机环境检测 |
+| `GET` | `/openclaw/agents` | OpenClaw 智能体列表 |
+| `GET` | `/openclaw/models` | 模型配置 |
+| `GET` | `/openclaw/channels` | 消息渠道管理 |
+| `GET` | `/hermes/agents` | Hermes 智能体列表 |
+| `GET` | `/cc-connect/projects` | CC-Connect 项目列表 |
+| `GET` | `/task-board/kpi` | 任务看板 KPI 指标 |
+| `GET` | `/task-board/execute/stream` | SSE 实时执行流 |
+| `GET` | `/automation-control/workflows` | 自动化工作流 |
 
-发布构建会涉及 Tauri 签名、Apple 证书、updater key、Docker Windows 构建等本地敏感配置。相关私钥和证书应只保存在 `AgentBox-Apple/`，不要提交。
+OpenAPI 规范文件：
 
-## 安全边界
+- `http://127.0.0.1:8787/openapi.json`
+- `http://127.0.0.1:8787/openapi.yaml`
+- `http://127.0.0.1:8787/openapi-3.0.json`
 
-以下内容默认不应进入 Git：
+## 环境变量
 
-- `AgentBox-Apple/`
-- `*.p8`
-- `*.p12`
-- `*.key`
-- `*.pem`
-- `*.cer`
-- `*.certSigningRequest`
-- `RepositorySecrets.txt`
-- `tauri-updater.password`
-- `.env`
-- `Client/.env`
-- `Releases-Build/Update/.env`
-- `Client/src-tauri/binaries/*`
-- `Client/src-tauri/target/`
-- `Server/tmp/`
-- `Server/bin/`
-- `dist/`、`output/`、`out/`
+后端配置文件：`Server/.env.example`
 
-提交前建议检查：
-
-```bash
-git status --short --ignored
-git diff --cached --name-only
-```
-
-如果需要检查敏感内容：
-
-```bash
-git grep --cached -n -I -E 'BEGIN (RSA|OPENSSH|PRIVATE)|github_pat_|ghp_|sk-[A-Za-z0-9_-]{20,}|OPENAI_API_KEY=.+|PASSWORD=.+|SECRET=.+|TOKEN=.+'
-```
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `APP_ENV` | `development` | 运行环境 |
+| `SERVER_HOST` | `127.0.0.1` | 监听地址 |
+| `SERVER_PORT` | `8787` | 监听端口 |
+| `DATABASE_URL` | `~/.agent-box/data.db` | SQLite 路径 |
+| `AUTH_CONFIG_PATH` | `~/.agent-box/auth.json` | 认证配置路径 |
+| `AUTH_DEFAULT_TOKEN` | — | 首次生成时的默认 Token |
+| `LOG_LEVEL` | `info` | 日志级别 |
+| `OPENCLAW_PUBLIC_GATEWAY_URL` | — | OpenClaw Gateway 公网地址 |
+| `AGENTBOX_PUBLIC_URL` | — | AgentBox 公网访问地址 |
 
 ## 开发约定
 
-- 后端开发默认使用 `go run github.com/air-verse/air@latest`。
-- 前端开发默认使用 `pnpm dev`。
-- 日常开发不需要执行前端 build。
-- 后端业务逻辑或 handler 文件建议在文件开头用中文注释说明职责、接口用途、关键查询参数或缓存策略。
-- 优先保持目录边界清晰：前端 API 调用放在 `Client/src/api/`，页面放在 `Client/src/pages/`，后端 handler 放在 `Server/internal/httpapi/handlers/`。
-- 生成物、证书、密钥、真实环境变量和本地缓存不要提交。
+- **后端**: 使用 `go run github.com/air-verse/air@latest` 热重载开发
+- **前端**: 使用 `pnpm dev` 启动 Vite 开发服务器
+- **API 层**: 前端 API 调用放在 `Client/src/api/`，页面放在 `Client/src/pages/`
+- **Handler**: 后端 handler 文件开头用注释说明职责与接口用途
+- **编译验证**: 前端 `npx vite build` 通过才算可用（`tsc` 不检查模块导出）
+- **不要提交**: 生成物、证书、密钥、真实环境变量、本地缓存
 
-## 常用命令
+## 安全
+
+以下内容不应进入 Git：
+
+- `AgentBox-Apple/`、证书文件（`*.p8`、`*.p12`、`*.key`、`*.pem`）
+- `.env`、`Client/.env`
+- `Client/src-tauri/binaries/*`、`Client/src-tauri/target/`
+- `Server/tmp/`、`Server/bin/`
+- `dist/`、`output/`、`out/`
+
+提交前检查：
 
 ```bash
-# 后端热重载
-cd Server
-go run github.com/air-verse/air@latest
-
-# 后端测试
-cd Server
-go test ./...
-
-# 前端开发
-cd Client
-pnpm dev
-
-# 前端 lint
-cd Client
-pnpm lint
-
-# Tauri 开发
-cd Client
-pnpm tauri:dev
-
-# Docker 独立部署
-cd AgentBox-Docker
-docker compose up -d
+git status --short --ignored
 ```
 
 ## 相关文档
 
-- `Server/README.md`
-- `AgentBox-Docker/README.md`
-- `AgentBox-Docker-Build/README.md`
-- `Installation-Script/README.md`
-- `Releases-Build/build.md`
+- `CLAUDE.md` — 项目开发手册（面向 AI 助手的完整工作上下文）
+- `ANALYSIS.md` — 二次开发升级分析报告
+- `PLAN.md` — 计划任务书
+- `PROGRESS.md` — 进程追踪
+- `NOTES.md` — 开发注意事项
+
+## License
+
+MIT License — 详见 [LICENSE](./LICENSE)
